@@ -4,6 +4,9 @@
 /**************************************************************************************************/
 
 #include <QMainWindow>
+#include <QTimer>
+#include <QSerialPort>
+#include <QSerialPortInfo>
 
 /**************************************************************************************************/
 
@@ -15,12 +18,19 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    public:
+        explicit MainWindow(QWidget *parent = nullptr);
+        ~MainWindow();
 
-private:
-    Ui::MainWindow *ui;
+    public slots:
+        void SerialPortsCheck(void);
+
+    private:
+        Ui::MainWindow *ui;
+        QTimer *qtimer_serial_ports;
+        QStringList qstrl_available_serial_ports;
+
+        void SerialPortsChecks_timer_init(void);
 };
 
 /**************************************************************************************************/
