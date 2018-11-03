@@ -22,15 +22,19 @@ class MainWindow : public QMainWindow
         explicit MainWindow(QWidget *parent = nullptr);
         ~MainWindow();
 
-    public slots:
+    private slots:
         void SerialPortsCheck(void);
+        void ButtonOpenPressed(void);
+        void ButtonClosePressed(void);
 
     private:
         Ui::MainWindow *ui;
+        QSerialPort *serial_port;
         QTimer *qtimer_serial_ports;
         QStringList qstrl_available_serial_ports;
 
         void SerialPortsChecks_timer_init(void);
+        void SerialPortErrorHandler(void);
 };
 
 /**************************************************************************************************/

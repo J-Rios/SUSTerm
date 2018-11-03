@@ -46,6 +46,9 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="1" column="5">
        <widget class="QPushButton" name="pushButton_close">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -144,7 +147,7 @@
          <enum>Qt::RightToLeft</enum>
         </property>
         <property name="text">
-         <string>Status: Disconnected</string>
+         <string>Status: Disconnected.</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -160,6 +163,9 @@
       </property>
       <item>
        <widget class="QLineEdit" name="lineEdit_toSend">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -188,6 +194,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_send">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -366,6 +375,9 @@
         <property name="currentText">
          <string/>
         </property>
+        <property name="maxVisibleItems">
+         <number>10</number>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToContents</enum>
         </property>
@@ -373,6 +385,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_clear">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
