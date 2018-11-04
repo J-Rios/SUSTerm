@@ -35,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->pushButton_clear, SIGNAL(released()), this, SLOT(ButtonClearPressed()));
     connect(ui->pushButton_send, SIGNAL(released()), this, SLOT(ButtonSendPressed()));
     connect(ui->lineEdit_toSend, SIGNAL(returnPressed()), this, SLOT(ButtonSendPressed()));
+    connect(ui->comboBox_bauds, SIGNAL(currentIndexChanged(const QString &)), this,
+            SLOT(CBoxBaudsChanged()));
 
     // Instantiate SerialPort object and connect received data signal to read event handler
     serial_port = new QSerialPort;
@@ -218,6 +220,24 @@ void MainWindow::ClosePort(void)
     ui->lineEdit_toSend->setEnabled(false);
     ui->pushButton_open->setEnabled(true);
     ui->comboBox_SerialPort->setEnabled(true);
+}
+
+/**************************************************************************************************/
+
+/* Bauds change */
+
+// ComboBox Bauds change event handler
+void MainWindow::CBoxBaudsChanged(void)
+{
+    qDebug("Bauds changed.");
+
+    // Close the port if it is already open
+    if((serial_port->isWritable()) || (serial_port->isReadable()))
+    {
+        qDebug("Reconnecting to port using new baudrate.");
+        ClosePort();
+        OpenPort();
+    }
 }
 
 /**************************************************************************************************/

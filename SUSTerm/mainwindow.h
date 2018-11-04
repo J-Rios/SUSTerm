@@ -41,6 +41,7 @@ class MainWindow : public QMainWindow
         void ButtonClearPressed(void);
         void ButtonSendPressed(void);
         void SerialReceive(void);
+        void CBoxBaudsChanged(void);
         //void SerialPortErrorHandler(void);
 };
 
