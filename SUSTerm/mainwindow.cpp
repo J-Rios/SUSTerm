@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // ComboBox_bauds initialization
     ui->comboBox_bauds->addItems(comboBox_bauds_values);
     ui->comboBox_bauds->setCurrentIndex(bauds_default_value);
-    ui->comboBox_bauds->setValidator(new QIntValidator(0, 99999999, this) );
+    ui->comboBox_bauds->setValidator(new QIntValidator(0, 99999999, this));
 
     qDebug("Connecting events signals...");
 
@@ -35,8 +35,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->pushButton_clear, SIGNAL(released()), this, SLOT(ButtonClearPressed()));
     connect(ui->pushButton_send, SIGNAL(released()), this, SLOT(ButtonSendPressed()));
     connect(ui->lineEdit_toSend, SIGNAL(returnPressed()), this, SLOT(ButtonSendPressed()));
-    /*connect(ui->lineEdit_toSend, SIGNAL(keyPressEvent(QKeyEvent *)), this,
-            SLOT(keyPressEvent(QKeyEvent *event)));*/
     connect(ui->comboBox_bauds, SIGNAL(currentIndexChanged(const QString &)), this,
             SLOT(CBoxBaudsChanged()));
 
@@ -193,6 +191,8 @@ void MainWindow::OpenPort(void)
         ui->pushButton_open->setEnabled(false);
         ui->comboBox_SerialPort->setEnabled(false);
 
+        ui->lineEdit_toSend->setFocus();
+
         qDebug("Port successfully open.");
     }
     else
@@ -256,6 +256,7 @@ void MainWindow::ButtonClearPressed(void)
 {
     qDebug("Clear Button pressed.");
     ui->textBrowser_serial->clear();
+    ui->lineEdit_toSend->setFocus();
 }
 
 // Serial received data from port
@@ -316,6 +317,7 @@ void MainWindow::SerialSend(void)
 
     // Add to send data to history list
     qstrl_send_history.prepend(qstr_to_send);
+    send_history_i = -1;
 
     // Append selected end character to data to be send
     qstr_to_send = qstr_to_send + EOL_values[ui->comboBox_EOL->currentIndex()];
@@ -333,6 +335,8 @@ void MainWindow::SerialSend(void)
         QByteArray qba_error = serial_port->errorString().toUtf8();
         qDebug("Error - %s.\n", qba_error.data());
     }
+
+    ui->lineEdit_toSend->setFocus();
 }
 
 /**************************************************************************************************/
