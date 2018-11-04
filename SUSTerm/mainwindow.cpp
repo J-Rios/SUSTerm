@@ -33,12 +33,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->pushButton_open, SIGNAL(released()), this, SLOT(ButtonOpenPressed()));
     connect(ui->pushButton_close, SIGNAL(released()), this, SLOT(ButtonClosePressed()));
 
+    // Instantiate SerialPort object and connect received data signal to read event handler
+    serial_port = new QSerialPort;
+    connect(serial_port, SIGNAL(readyRead()), this, SLOT(SerialReceive()));
+    //connect(serial_port, SIGNAL(errorOccurred()), this, SLOT(SerialPortErrorHandler()));
+
     // Setup and start timer for Serial Ports checks
     qDebug("Initializing Serial Ports check timer...");
     SerialPortsChecks_timer_init();
-
-    // Instantiate SerialPort object
-    serial_port = new QSerialPort;
 
     qDebug("Setup process end.\n");
 }
@@ -217,26 +219,49 @@ void MainWindow::ClosePort(void)
 
 /**************************************************************************************************/
 
+/* Serial Receive */
+
+// Serial received data from port
+void MainWindow::SerialReceive(void)
+{
+    //qDebug("Serial data received...");
+
+    // Send the data if the port is available
+    if(serial_port->isReadable())
+    {
+        // Set textbox cursor to bottom
+        QTextCursor cursor = ui->textBrowser_serial->textCursor();
+        cursor.movePosition(QTextCursor::End);
+        ui->textBrowser_serial->setTextCursor(cursor);
+
+        // Write the received data to textbox
+        ui->textBrowser_serial->insertPlainText(serial_port->readAll());
+
+        // If Autoscroll is checked, scroll to bottom
+        if(ui->checkBox_autoScroll->isChecked())
+        {
+            QScrollBar *vertical_bar = ui->textBrowser_serial->verticalScrollBar();
+            vertical_bar->setValue(vertical_bar->maximum());
+        }
+    }
+    else
+    {
+        // An error occurred when reading from port
+        qint64 availables_bytes = serial_port->bytesAvailable();
+        qDebug("There is %llu bytes in Rx buffer but them can't be read", availables_bytes);
+        QByteArray qba_error = serial_port->errorString().toUtf8();
+        qDebug("Error - %s.\n", qba_error.data());
+    }
+}
+
+/**************************************************************************************************/
+
 /*void MainWindow::SerialPortErrorHandler(void)
 {
-    if(serial_port->error() == QSerialPort::SerialPortError::DeviceNotFoundError)
-        qDebug("Error - Port not found.\n");
-    else if (serial_port->error() == QSerialPort::SerialPortError::PermissionError)
-        qDebug("Error - No permission for open the port.\n");
-    else if (serial_port->error() == QSerialPort::SerialPortError::OpenError)
-        qDebug("Error - The port is already open.\n");
-    else if (serial_port->error() == QSerialPort::SerialPortError::NotOpenError)
-        qDebug("Error - Invalid operation to port that is not open.\n");
-    else if (serial_port->error() == QSerialPort::SerialPortError::WriteError)
-        qDebug("Error - An I/O error occurred while writing data.\n");
-    else if (serial_port->error() == QSerialPort::SerialPortError::ReadError)
-        qDebug("Error - An I/O error occurred while reading data..\n");
-    else if (serial_port->error() == QSerialPort::SerialPortError::ResourceError)
-        qDebug("Error - Port unavailable (unexpected device disconnection).\n");
-    else if (serial_port->error() == QSerialPort::SerialPortError::UnsupportedOperationError)
-        qDebug("Error - OS unsupported operation with serial port.\n");
-    else if (serial_port->error() == QSerialPort::SerialPortError::TimeoutError)
-        qDebug("Error - Serial port Timeout.\n");
-    else if (serial_port->error() == QSerialPort::SerialPortError::UnknownError)
-        qDebug("Error - Serial port unexpected error.\n");
+    // An error occurred when opening the port
+    QByteArray qba_error = serial_port->errorString().toUtf8();
+    qDebug("Error - %s.\n", qba_error.data());
+
+    ui->label_status->setStyleSheet("QLabel { color : red; }");
+    ui->label_status->setText("Status: " + serial_port->errorString());
 }*/

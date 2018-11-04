@@ -4,6 +4,7 @@
 /**************************************************************************************************/
 
 #include <QMainWindow>
+#include <QScrollBar>
 #include <QTimer>
 #include <QSerialPort>
 #include <QSerialPortInfo>
@@ -22,11 +23,6 @@ class MainWindow : public QMainWindow
         explicit MainWindow(QWidget *parent = nullptr);
         ~MainWindow();
 
-    private slots:
-        void SerialPortsCheck(void);
-        void ButtonOpenPressed(void);
-        void ButtonClosePressed(void);
-
     private:
         Ui::MainWindow *ui;
         QSerialPort *serial_port;
@@ -36,6 +32,12 @@ class MainWindow : public QMainWindow
         void SerialPortsChecks_timer_init(void);
         void OpenPort(void);
         void ClosePort(void);
+
+    private slots:
+        void SerialPortsCheck(void);
+        void ButtonOpenPressed(void);
+        void ButtonClosePressed(void);
+        void SerialReceive(void);
         //void SerialPortErrorHandler(void);
 };
 

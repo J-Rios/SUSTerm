@@ -14,6 +14,13 @@ QStringList static comboBox_EOL_values =
     "Carriage Return",
     "Both NL & CR"
 };
+QStringList static EOL_values =
+{
+    "",
+    "\n",
+    "\r",
+    "\r\n"
+};
 const int eol_default_value = 1; // 1 = New Line
 
 QStringList static comboBox_bauds_values =
