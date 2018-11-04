@@ -427,6 +427,19 @@ p, li { white-space: pre-wrap; }
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>comboBox_SerialPort</tabstop>
+  <tabstop>pushButton_open</tabstop>
+  <tabstop>pushButton_close</tabstop>
+  <tabstop>lineEdit_toSend</tabstop>
+  <tabstop>pushButton_send</tabstop>
+  <tabstop>textBrowser_serial</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>checkBox_autoScroll</tabstop>
+  <tabstop>comboBox_EOL</tabstop>
+  <tabstop>comboBox_bauds</tabstop>
+  <tabstop>pushButton_clear</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
