@@ -29,12 +29,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     qDebug("Connecting events signals...");
 
-    // Buttons click event setup
+    // UI elements user interactions signals event setup
     connect(ui->pushButton_open, SIGNAL(released()), this, SLOT(ButtonOpenPressed()));
     connect(ui->pushButton_close, SIGNAL(released()), this, SLOT(ButtonClosePressed()));
     connect(ui->pushButton_clear, SIGNAL(released()), this, SLOT(ButtonClearPressed()));
     connect(ui->pushButton_send, SIGNAL(released()), this, SLOT(ButtonSendPressed()));
     connect(ui->lineEdit_toSend, SIGNAL(returnPressed()), this, SLOT(ButtonSendPressed()));
+    /*connect(ui->lineEdit_toSend, SIGNAL(keyPressEvent(QKeyEvent *)), this,
+            SLOT(keyPressEvent(QKeyEvent *event)));*/
     connect(ui->comboBox_bauds, SIGNAL(currentIndexChanged(const QString &)), this,
             SLOT(CBoxBaudsChanged()));
 
@@ -46,6 +48,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Setup and start timer for Serial Ports checks
     qDebug("Initializing Serial Ports check timer...");
     SerialPortsChecks_timer_init();
+
+    installEventFilter(this);
+
+    // Inicial send history index to -1
+    send_history_i = -1;
 
     qDebug("Setup process end.\n");
 }
@@ -307,6 +314,9 @@ void MainWindow::SerialSend(void)
         return;
     }
 
+    // Add to send data to history list
+    qstrl_send_history.prepend(qstr_to_send);
+
     // Append selected end character to data to be send
     qstr_to_send = qstr_to_send + EOL_values[ui->comboBox_EOL->currentIndex()];
 
@@ -323,6 +333,56 @@ void MainWindow::SerialSend(void)
         QByteArray qba_error = serial_port->errorString().toUtf8();
         qDebug("Error - %s.\n", qba_error.data());
     }
+}
+
+/**************************************************************************************************/
+
+/* History Change Of To Send Data */
+
+// Keyboard keys pressed event handler
+bool MainWindow::eventFilter(QObject *target, QEvent *event)
+{
+    // If Event is a keyboard key press
+    if(event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+
+        // If Key pressed is Up arrow, the focus is set to send box and history is not empty
+        if(keyEvent->key() == Qt::Key_Up)
+        {
+            if(ui->lineEdit_toSend->hasFocus())
+            {
+                if(!qstrl_send_history.isEmpty() && (send_history_i >= -1))
+                {
+                    if(send_history_i < qstrl_send_history.size() - 1)
+                    {
+                        send_history_i = send_history_i + 1;
+                        ui->lineEdit_toSend->setText(qstrl_send_history[send_history_i]);
+                    }
+                }
+            }
+        }
+
+        // If Key pressed is Down arrow, the focus is set to send box and history is not empty
+        if(keyEvent->key() == Qt::Key_Down)
+        {
+            if(ui->lineEdit_toSend->hasFocus())
+            {
+                if(!qstrl_send_history.isEmpty())
+                {
+                    if(send_history_i > -1)
+                        send_history_i = send_history_i - 1;
+
+                    if(send_history_i > -1)
+                        ui->lineEdit_toSend->setText(qstrl_send_history[send_history_i]);
+                    else
+                        ui->lineEdit_toSend->clear();
+                }
+            }
+        }
+    }
+
+    return QObject::eventFilter(target, event);
 }
 
 /**************************************************************************************************/

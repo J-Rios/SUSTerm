@@ -5,6 +5,7 @@
 
 #include <QMainWindow>
 #include <QScrollBar>
+#include <QKeyEvent>
 #include <QTimer>
 #include <QSerialPort>
 #include <QSerialPortInfo>
@@ -28,6 +29,8 @@ class MainWindow : public QMainWindow
         QSerialPort *serial_port;
         QTimer *qtimer_serial_ports;
         QStringList qstrl_available_serial_ports;
+        QStringList qstrl_send_history;
+        int send_history_i;
 
         void SerialPortsChecks_timer_init(void);
         void OpenPort(void);
@@ -42,6 +45,7 @@ class MainWindow : public QMainWindow
         void ButtonSendPressed(void);
         void SerialReceive(void);
         void CBoxBaudsChanged(void);
+        bool eventFilter(QObject *target, QEvent *event);
         //void SerialPortErrorHandler(void);
 };
 
