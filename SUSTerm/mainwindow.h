@@ -32,12 +32,14 @@ class MainWindow : public QMainWindow
         void SerialPortsChecks_timer_init(void);
         void OpenPort(void);
         void ClosePort(void);
+        void SerialSend(void);
 
     private slots:
         void SerialPortsCheck(void);
         void ButtonOpenPressed(void);
         void ButtonClosePressed(void);
         void ButtonClearPressed(void);
+        void ButtonSendPressed(void);
         void SerialReceive(void);
         //void SerialPortErrorHandler(void);
 };

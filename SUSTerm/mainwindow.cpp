@@ -33,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->pushButton_open, SIGNAL(released()), this, SLOT(ButtonOpenPressed()));
     connect(ui->pushButton_close, SIGNAL(released()), this, SLOT(ButtonClosePressed()));
     connect(ui->pushButton_clear, SIGNAL(released()), this, SLOT(ButtonClearPressed()));
+    connect(ui->pushButton_send, SIGNAL(released()), this, SLOT(ButtonSendPressed()));
+    connect(ui->lineEdit_toSend, SIGNAL(returnPressed()), this, SLOT(ButtonSendPressed()));
 
     // Instantiate SerialPort object and connect received data signal to read event handler
     serial_port = new QSerialPort;
@@ -222,6 +224,13 @@ void MainWindow::ClosePort(void)
 
 /* Serial Receive */
 
+// Button clear event handler
+void MainWindow::ButtonClearPressed(void)
+{
+    qDebug("Clear Button pressed.");
+    ui->textBrowser_serial->clear();
+}
+
 // Serial received data from port
 void MainWindow::SerialReceive(void)
 {
@@ -257,12 +266,43 @@ void MainWindow::SerialReceive(void)
 
 /**************************************************************************************************/
 
-/* Received Data TextBox Clear */
+/* Serial Sends */
 
-// Button clear event handler
-void MainWindow::ButtonClearPressed(void)
+// Button Send pressed event handler
+void MainWindow::ButtonSendPressed(void)
 {
-    ui->textBrowser_serial->clear();
+    qDebug("Send Button pressed.");
+    SerialSend();
+    ui->lineEdit_toSend->clear();
+}
+
+// Serial send data from lineEdit box
+void MainWindow::SerialSend(void)
+{
+    // Check if to send data box is empty
+    QString qstr_to_send = ui->lineEdit_toSend->text();
+    if((qstr_to_send.isNull()) || (qstr_to_send.isEmpty()))
+    {
+        qDebug("Data to send box is null or empty");
+        return;
+    }
+
+    // Append selected end character to data to be send
+    qstr_to_send = qstr_to_send + EOL_values[ui->comboBox_EOL->currentIndex()];
+
+    // Send the data if the port is available
+    if(serial_port->isWritable())
+    {
+        // Convert QString to QByteArray to send a char* type
+        QByteArray qba_to_send = qstr_to_send.toUtf8();
+        serial_port->write(qba_to_send.data());
+    }
+    else
+    {
+        // An error occurred when writting to port
+        QByteArray qba_error = serial_port->errorString().toUtf8();
+        qDebug("Error - %s.\n", qba_error.data());
+    }
 }
 
 /**************************************************************************************************/
