@@ -4,6 +4,9 @@
 
 /**************************************************************************************************/
 
+/* Main Window Constructor & Destructor */
+
+// Main Window Constructor
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     qDebug("\nApp start.\n");
@@ -40,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     qDebug("Setup process end.\n");
 }
 
+// Main Window Destructor
 MainWindow::~MainWindow()
 {
     // If the timer exists and is active, stop and release it
@@ -72,6 +76,9 @@ MainWindow::~MainWindow()
 
 /**************************************************************************************************/
 
+/* Serial Ports Check */
+
+// Serial Ports check timer initialization and start
 void MainWindow::SerialPortsChecks_timer_init(void)
 {
     qtimer_serial_ports = new QTimer(this);
@@ -79,6 +86,7 @@ void MainWindow::SerialPortsChecks_timer_init(void)
     qtimer_serial_ports->start(500); // Run SerialPortsCheck() each 500ms
 }
 
+// Serial Ports check timer fire event handler (this method run each 500ms)
 void MainWindow::SerialPortsCheck(void)
 {
     QStringList qstrl_actual_ports;
@@ -116,28 +124,36 @@ void MainWindow::SerialPortsCheck(void)
 
 /**************************************************************************************************/
 
-// Open Serial port if there is any valid selected port and bauds in comboBoxes
+/* Serial Port Open & Close */
+
+// Button Open pressed event handler
 void MainWindow::ButtonOpenPressed(void)
 {
     qDebug("Open Button pressed.");
+    OpenPort();
+}
 
+// Button Close pressed event handler
+void MainWindow::ButtonClosePressed(void)
+{
+    qDebug("Close Button pressed.");
+    ClosePort();
+}
+
+// Open Serial port if there is any valid selected port and bauds in comboBoxes
+void MainWindow::OpenPort(void)
+{
     QString selected_port = ui->comboBox_SerialPort->currentText();
     if((selected_port.isNull()) || (selected_port.isEmpty()))
     {
-        if(selected_port.isNull())
-            qDebug("Port is null");
-        if(selected_port.isEmpty())
-            qDebug("Port is empty");
+        qDebug("Port is null or empty");
         return;
     }
 
     QString selected_bauds = ui->comboBox_bauds->currentText();
     if((selected_bauds.isNull()) || (selected_bauds.isEmpty()))
     {
-        if(selected_bauds.isNull())
-            qDebug("Bauds is null");
-        if(selected_bauds.isEmpty())
-            qDebug("Bauds is empty");
+        qDebug("Bauds is null or empty");
         return;
     }
 
@@ -176,18 +192,17 @@ void MainWindow::ButtonOpenPressed(void)
     }
 }
 
-void MainWindow::ButtonClosePressed(void)
+// Close serial port if it is open
+void MainWindow::ClosePort(void)
 {
-    qDebug("Close Button pressed.");
-
-    // Close the port if it is apparently open
+    // Close the port if it is available
     if((serial_port->isWritable()) || (serial_port->isReadable()))
     {
         serial_port->close();
         qDebug("Port successfully close.");
     }
     else
-        qDebug("Port is not writable/readable.");
+        qDebug("Port cannot be closed, because is not writable/readable.");
 
     ui->label_status->setStyleSheet("QLabel { color : black; }");
     ui->label_status->setText("Status: Disconnected.");
@@ -200,7 +215,9 @@ void MainWindow::ButtonClosePressed(void)
     ui->comboBox_SerialPort->setEnabled(true);
 }
 
-void MainWindow::SerialPortErrorHandler(void)
+/**************************************************************************************************/
+
+/*void MainWindow::SerialPortErrorHandler(void)
 {
     if(serial_port->error() == QSerialPort::SerialPortError::DeviceNotFoundError)
         qDebug("Error - Port not found.\n");
@@ -222,4 +239,4 @@ void MainWindow::SerialPortErrorHandler(void)
         qDebug("Error - Serial port Timeout.\n");
     else if (serial_port->error() == QSerialPort::SerialPortError::UnknownError)
         qDebug("Error - Serial port unexpected error.\n");
-}
+}*/

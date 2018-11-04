@@ -34,7 +34,9 @@ class MainWindow : public QMainWindow
         QStringList qstrl_available_serial_ports;
 
         void SerialPortsChecks_timer_init(void);
-        void SerialPortErrorHandler(void);
+        void OpenPort(void);
+        void ClosePort(void);
+        //void SerialPortErrorHandler(void);
 };
 
 /**************************************************************************************************/
