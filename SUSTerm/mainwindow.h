@@ -37,6 +37,7 @@ class MainWindow : public QMainWindow
         void SerialPortsCheck(void);
         void ButtonOpenPressed(void);
         void ButtonClosePressed(void);
+        void ButtonClearPressed(void);
         void SerialReceive(void);
         //void SerialPortErrorHandler(void);
 };

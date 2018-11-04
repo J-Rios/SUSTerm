@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Buttons click event setup
     connect(ui->pushButton_open, SIGNAL(released()), this, SLOT(ButtonOpenPressed()));
     connect(ui->pushButton_close, SIGNAL(released()), this, SLOT(ButtonClosePressed()));
+    connect(ui->pushButton_clear, SIGNAL(released()), this, SLOT(ButtonClearPressed()));
 
     // Instantiate SerialPort object and connect received data signal to read event handler
     serial_port = new QSerialPort;
@@ -252,6 +253,16 @@ void MainWindow::SerialReceive(void)
         QByteArray qba_error = serial_port->errorString().toUtf8();
         qDebug("Error - %s.\n", qba_error.data());
     }
+}
+
+/**************************************************************************************************/
+
+/* Received Data TextBox Clear */
+
+// Button clear event handler
+void MainWindow::ButtonClearPressed(void)
+{
+    ui->textBrowser_serial->clear();
 }
 
 /**************************************************************************************************/
