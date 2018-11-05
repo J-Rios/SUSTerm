@@ -267,19 +267,29 @@ void MainWindow::SerialReceive(void)
     // Send the data if the port is available
     if(serial_port->isReadable())
     {
+        // Get original cursor and scroll position
+        QTextCursor original_cursor_position = ui->textBrowser_serial->textCursor();
+        int original_scroll_position = ui->textBrowser_serial->verticalScrollBar()->value();
+
         // Set textbox cursor to bottom
-        QTextCursor cursor = ui->textBrowser_serial->textCursor();
-        cursor.movePosition(QTextCursor::End);
-        ui->textBrowser_serial->setTextCursor(cursor);
+        QTextCursor new_cursor = original_cursor_position;
+        new_cursor.movePosition(QTextCursor::End);
+        ui->textBrowser_serial->setTextCursor(new_cursor);
 
         // Write the received data to textbox
         ui->textBrowser_serial->insertPlainText(serial_port->readAll());
 
         // If Autoscroll is checked, scroll to bottom
+        QScrollBar *vertical_bar = ui->textBrowser_serial->verticalScrollBar();
         if(ui->checkBox_autoScroll->isChecked())
         {
-            QScrollBar *vertical_bar = ui->textBrowser_serial->verticalScrollBar();
             vertical_bar->setValue(vertical_bar->maximum());
+        }
+        else
+        {
+            // Return to previous cursor and scroll position
+            ui->textBrowser_serial->setTextCursor(original_cursor_position);
+            vertical_bar->setValue(original_scroll_position);
         }
     }
     else
