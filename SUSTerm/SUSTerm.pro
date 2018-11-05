@@ -7,6 +7,8 @@
 QT       += core gui
 QT       += serialport
 
+RC_FILE = resourcecollection.rc
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = SUSTerm
