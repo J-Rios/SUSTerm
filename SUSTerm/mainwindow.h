@@ -46,7 +46,7 @@ class MainWindow : public QMainWindow
         void SerialReceive(void);
         void CBoxBaudsChanged(void);
         bool eventFilter(QObject *target, QEvent *event);
-        //void SerialPortErrorHandler(void);
+        void SerialPortErrorHandler(void);
 };
 
 /**************************************************************************************************/

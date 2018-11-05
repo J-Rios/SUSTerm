@@ -38,15 +38,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->comboBox_bauds, SIGNAL(currentIndexChanged(const QString &)), this,
             SLOT(CBoxBaudsChanged()));
 
-    // Instantiate SerialPort object and connect received data signal to read event handler
+    // Instantiate SerialPort object and connect received data and error signal to event handlers
     serial_port = new QSerialPort;
     connect(serial_port, SIGNAL(readyRead()), this, SLOT(SerialReceive()));
-    //connect(serial_port, SIGNAL(errorOccurred()), this, SLOT(SerialPortErrorHandler()));
+    connect(serial_port, QOverload<QSerialPort::SerialPortError>::of(&QSerialPort::errorOccurred),
+            this, [=](){SerialPortErrorHandler();});
 
     // Setup and start timer for Serial Ports checks
     qDebug("Initializing Serial Ports check timer...");
     SerialPortsChecks_timer_init();
 
+    // Add an event filter to catch keyboard signals with an eventFilter() handler
     installEventFilter(this);
 
     // Inicial send history index to -1
@@ -195,15 +197,6 @@ void MainWindow::OpenPort(void)
 
         qDebug("Port successfully open.");
     }
-    else
-    {
-        // An error occurred when opening the port
-        QByteArray qba_error = serial_port->errorString().toUtf8();
-        qDebug("Error - %s.\n", qba_error.data());
-
-        ui->label_status->setStyleSheet("QLabel { color : red; }");
-        ui->label_status->setText("Status: " + serial_port->errorString());
-    }
 }
 
 // Close serial port if it is open
@@ -214,12 +207,10 @@ void MainWindow::ClosePort(void)
     {
         serial_port->close();
         qDebug("Port successfully close.");
-    }
-    else
-        qDebug("Port cannot be closed, because is not writable/readable.");
 
-    ui->label_status->setStyleSheet("QLabel { color : black; }");
-    ui->label_status->setText("Status: Disconnected.");
+        ui->label_status->setStyleSheet("QLabel { color : black; }");
+        ui->label_status->setText("Status: Disconnected.");
+    }
 
     // Change enable/disable states of UI elements
     ui->pushButton_close->setEnabled(false);
@@ -292,14 +283,6 @@ void MainWindow::SerialReceive(void)
             vertical_bar->setValue(original_scroll_position);
         }
     }
-    else
-    {
-        // An error occurred when reading from port
-        qint64 availables_bytes = serial_port->bytesAvailable();
-        qDebug("There is %llu bytes in Rx buffer but them can't be read", availables_bytes);
-        QByteArray qba_error = serial_port->errorString().toUtf8();
-        qDebug("Error - %s.\n", qba_error.data());
-    }
 }
 
 /**************************************************************************************************/
@@ -338,12 +321,6 @@ void MainWindow::SerialSend(void)
         // Convert QString to QByteArray to send a char* type
         QByteArray qba_to_send = qstr_to_send.toUtf8();
         serial_port->write(qba_to_send.data());
-    }
-    else
-    {
-        // An error occurred when writting to port
-        QByteArray qba_error = serial_port->errorString().toUtf8();
-        qDebug("Error - %s.\n", qba_error.data());
     }
 
     ui->lineEdit_toSend->setFocus();
@@ -401,12 +378,20 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
 
 /**************************************************************************************************/
 
-/*void MainWindow::SerialPortErrorHandler(void)
-{
-    // An error occurred when opening the port
-    QByteArray qba_error = serial_port->errorString().toUtf8();
-    qDebug("Error - %s.\n", qba_error.data());
+/* Serial Port Error Signal Handler */
 
-    ui->label_status->setStyleSheet("QLabel { color : red; }");
-    ui->label_status->setText("Status: " + serial_port->errorString());
-}*/
+// An error occurred in the port
+void MainWindow::SerialPortErrorHandler(void)
+{
+    if(serial_port->error() != QSerialPort::NoError)
+    {
+        QByteArray qba_error = serial_port->errorString().toUtf8();
+        qDebug("Error - %s\n", qba_error.data());
+
+        ui->label_status->setStyleSheet("QLabel { color : red; }");
+        ui->label_status->setText("Status: " + serial_port->errorString());
+
+        // Force close
+        ClosePort();
+    }
+}
