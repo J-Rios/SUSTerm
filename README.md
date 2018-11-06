@@ -19,7 +19,7 @@ Linux:
   $ unzip Linux_SUSTerm_v100.zip
   $ cd Linux_SUSTerm_v100
   $ chmod +x install
-  $ sudo install
+  $ sudo ./install
   ```
   
   * Remove unnecessary used files:
