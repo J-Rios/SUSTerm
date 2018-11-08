@@ -28,6 +28,12 @@ Linux:
   $ rm -rf Linux_SUSTerm_v100.*
   ```
   
+  * Add actual user to dialout group to allow open serial ports without been root:
+  ```
+  $ sudo usermod -a -G dialout $USER
+  $ sudo reboot
+  ```
+  
   * Run SUSTerm:
   ```
   $ SUSTerm
