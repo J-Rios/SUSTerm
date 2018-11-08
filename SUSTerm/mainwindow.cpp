@@ -27,6 +27,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->comboBox_bauds->setCurrentIndex(bauds_default_value);
     ui->comboBox_bauds->setValidator(new QIntValidator(0, 99999999, this));
 
+    // TextBrowser_Serial initialization
+    ui->textBrowser_serial->clear();
+    ui->lineEdit_toSend->setFocus();
+
     qDebug("Connecting events signals...");
 
     // UI elements user interactions signals event setup
