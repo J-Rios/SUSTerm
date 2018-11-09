@@ -187,6 +187,9 @@ void MainWindow::OpenPort(void)
         serial_port->setStopBits(QSerialPort::OneStop);
         serial_port->setFlowControl(QSerialPort::NoFlowControl);
 
+        // Clear possible buffered data
+        serial_port->clear();
+
         ui->label_status->setStyleSheet("QLabel { color : blue; }");
         ui->label_status->setText("Status: Connected.");
 
