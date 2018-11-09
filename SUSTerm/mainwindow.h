@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QScrollBar>
 #include <QKeyEvent>
+#include <QDateTime>
 #include <QTimer>
 #include <QSerialPort>
 #include <QSerialPortInfo>
@@ -36,6 +37,7 @@ class MainWindow : public QMainWindow
         void OpenPort(void);
         void ClosePort(void);
         void SerialSend(void);
+        QString GetActualSystemTime(void);
 
     private slots:
         void SerialPortsCheck(void);

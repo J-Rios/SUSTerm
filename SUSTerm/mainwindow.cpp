@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->comboBox_bauds->setCurrentIndex(bauds_default_value);
     ui->comboBox_bauds->setValidator(new QIntValidator(0, 99999999, this));
 
-    // TextBrowser_Serial initialization
+    // TextBrowsers initialization
     ui->textBrowser_serial->clear();
     ui->lineEdit_toSend->setFocus();
 
@@ -271,22 +271,110 @@ void MainWindow::SerialReceive(void)
         new_cursor.movePosition(QTextCursor::End);
         ui->textBrowser_serial->setTextCursor(new_cursor);
 
-        // Write the received data to textbox
-        ui->textBrowser_serial->insertPlainText(serial_port->readAll());
+        // Get actual time
+        QString qstr_time = GetActualSystemTime();
+        QByteArray qba_time = QString("[" + qstr_time + "] ").toUtf8();
+        QByteArray qba_eol = QString("\n").toUtf8();
 
-        // If Autoscroll is checked, scroll to bottom
-        QScrollBar *vertical_bar = ui->textBrowser_serial->verticalScrollBar();
-        if(ui->checkBox_autoScroll->isChecked())
+        // Get the received data and split it by lines
+        QByteArray serial_data = serial_port->readAll();
+        QList<QByteArray> lines = serial_data.split('\n');
+
+        // Get data last character
+        char data_last_char = serial_data[serial_data.size()-1];
+
+        // If there is no an EOL in the received data
+        if(lines.isEmpty())
         {
-            vertical_bar->setValue(vertical_bar->maximum());
+            // Write the received data to textbox
+            ui->textBrowser_serial->insertPlainText(serial_data);
+
+            // If Autoscroll is checked, scroll to bottom
+            QScrollBar *vertical_bar = ui->textBrowser_serial->verticalScrollBar();
+            if(ui->checkBox_autoScroll->isChecked())
+            {
+                vertical_bar->setValue(vertical_bar->maximum());
+            }
+            else
+            {
+                // Return to previous cursor and scroll position
+                ui->textBrowser_serial->setTextCursor(original_cursor_position);
+                vertical_bar->setValue(original_scroll_position);
+            }
         }
         else
         {
-            // Return to previous cursor and scroll position
-            ui->textBrowser_serial->setTextCursor(original_cursor_position);
-            vertical_bar->setValue(original_scroll_position);
+            static bool last_line_was_eol = true;
+
+            // For each line of received data
+            for(int i = 0; i < lines.size(); i++)
+            {
+                // Format line data (join time, data and eol)
+                QByteArray to_print = lines[i];
+
+                // Add time to data if it is not the first line
+                if(i != 0)
+                    to_print = to_print.prepend(qba_time);
+                else
+                {
+                    // Add time to data if the last written line has an end of line
+                    if(last_line_was_eol)
+                        to_print = to_print.prepend(qba_time);
+                    else
+                        last_line_was_eol = false;
+                }
+
+                bool ignore_last_split_line = false;
+                // Recover lost EOL due to split if it is not the last line
+                if(i < lines.size()-1)
+                    to_print = to_print.append(qba_eol);
+                else
+                {
+                    // Data last character is an EOL
+                    if(data_last_char == '\n')
+                    {
+                        ignore_last_split_line = true;
+                        last_line_was_eol = true;
+                    }
+                    else
+                        last_line_was_eol = false;
+                }
+
+                // Ignore print this line
+                if(!ignore_last_split_line)
+                {
+                    // Write the line to textbox
+                    ui->textBrowser_serial->insertPlainText(to_print);
+
+                    // If Autoscroll is checked, scroll to bottom
+                    QScrollBar *vertical_bar = ui->textBrowser_serial->verticalScrollBar();
+                    if(ui->checkBox_autoScroll->isChecked())
+                    {
+                        vertical_bar->setValue(vertical_bar->maximum());
+                    }
+                    else
+                    {
+                        // Return to previous cursor and scroll position
+                        ui->textBrowser_serial->setTextCursor(original_cursor_position);
+                        vertical_bar->setValue(original_scroll_position);
+                    }
+                }
+            }
         }
     }
+}
+
+// Get an string of actual system time
+QString MainWindow::GetActualSystemTime(void)
+{
+    // Get local date
+    QDateTime date_local(QDateTime::currentDateTime());
+
+    // This is how to get UTC instead local
+    /*QDateTime date_UTC(QDateTime::currentDateTime());
+    date_UTC.setTimeSpec(Qt::UTC);*/
+
+    return date_local.time().toString();
 }
 
 /**************************************************************************************************/
