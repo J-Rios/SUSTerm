@@ -28,7 +28,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->comboBox_bauds->setValidator(new QIntValidator(0, 99999999, this));
 
     // TextBrowsers initialization
-    ui->textBrowser_serial->clear();
+    ui->textBrowser_serial_ascii->clear();
+    ui->textBrowser_serial_hex->clear();
     ui->lineEdit_toSend->setFocus();
 
     qDebug("Connecting events signals...");
@@ -41,6 +42,29 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->lineEdit_toSend, SIGNAL(returnPressed()), this, SLOT(ButtonSendPressed()));
     connect(ui->comboBox_bauds, SIGNAL(currentIndexChanged(const QString &)), this,
             SLOT(CBoxBaudsChanged()));
+
+    // Connect TextBrowsers Scrolls (scroll one of them move the other)
+    static int current_slider_pos = 0;
+    QScrollBar* scroll_ascii = ui->textBrowser_serial_ascii->verticalScrollBar();
+    QScrollBar* scroll_hex = ui->textBrowser_serial_hex->verticalScrollBar();
+    connect(scroll_ascii, &QAbstractSlider::valueChanged,
+            [=](int scroll_ascii_slider_pos)
+            {
+                if(scroll_ascii_slider_pos != current_slider_pos)
+                {
+                    scroll_hex->setValue(scroll_ascii_slider_pos);
+                    current_slider_pos = scroll_ascii_slider_pos;
+                }
+            });
+    connect(scroll_hex, &QAbstractSlider::valueChanged,
+            [=](int scroll_hex_slider_pos)
+            {
+                if(scroll_hex_slider_pos != current_slider_pos)
+                {
+                    scroll_ascii->setValue(scroll_hex_slider_pos);
+                    current_slider_pos = scroll_hex_slider_pos;
+                }
+            });
 
     // Instantiate SerialPort object and connect received data and error signal to event handlers
     serial_port = new QSerialPort;
@@ -253,7 +277,8 @@ void MainWindow::CBoxBaudsChanged(void)
 void MainWindow::ButtonClearPressed(void)
 {
     qDebug("Clear Button pressed.");
-    ui->textBrowser_serial->clear();
+    ui->textBrowser_serial_ascii->clear();
+    ui->textBrowser_serial_hex->clear();
     ui->lineEdit_toSend->setFocus();
 }
 
@@ -266,13 +291,18 @@ void MainWindow::SerialReceive(void)
     if(serial_port->isReadable())
     {
         // Get original cursor and scroll position
-        QTextCursor original_cursor_position = ui->textBrowser_serial->textCursor();
-        int original_scroll_position = ui->textBrowser_serial->verticalScrollBar()->value();
+        QTextCursor original_cursor_pos_ascii = ui->textBrowser_serial_ascii->textCursor();
+        QTextCursor original_cursor_pos_hex = ui->textBrowser_serial_hex->textCursor();
+        int original_scroll_pos_ascii = ui->textBrowser_serial_ascii->verticalScrollBar()->value();
+        int original_scroll_pos_hex = ui->textBrowser_serial_hex->verticalScrollBar()->value();
 
         // Set textbox cursor to bottom
-        QTextCursor new_cursor = original_cursor_position;
-        new_cursor.movePosition(QTextCursor::End);
-        ui->textBrowser_serial->setTextCursor(new_cursor);
+        QTextCursor new_cursor_ascii = original_cursor_pos_ascii;
+        QTextCursor new_cursor_hex = original_cursor_pos_hex;
+        new_cursor_ascii.movePosition(QTextCursor::End);
+        new_cursor_hex.movePosition(QTextCursor::End);
+        ui->textBrowser_serial_ascii->setTextCursor(new_cursor_ascii);
+        ui->textBrowser_serial_hex->setTextCursor(new_cursor_hex);
 
         // Get actual time
         QString qstr_time = GetActualSystemTime();
@@ -289,20 +319,35 @@ void MainWindow::SerialReceive(void)
         // If there is no an EOL in the received data
         if(lines.isEmpty())
         {
-            // Write the received data to textbox
-            ui->textBrowser_serial->insertPlainText(serial_data);
+            // Get the HEX data and format it to string
+            QByteArray serial_data_hex = serial_data.toHex();
+            serial_data_hex = serial_data_hex.toUpper();
+            if(serial_data_hex.length() > 2)
+            {
+                // Add spaces between pair of bytes of hex data (convert "A2345F" to "A2 34 5F")
+                for(int i = 2; i < serial_data_hex.length()-4; i = i + 3)
+                    serial_data_hex.insert(i, " ");
+            }
+
+            // Write the received data to ASCII and HEX textboxes
+            ui->textBrowser_serial_ascii->insertPlainText(serial_data);
+            ui->textBrowser_serial_hex->insertPlainText(serial_data_hex);
 
             // If Autoscroll is checked, scroll to bottom
-            QScrollBar *vertical_bar = ui->textBrowser_serial->verticalScrollBar();
+            QScrollBar *vertical_bar_ascii = ui->textBrowser_serial_ascii->verticalScrollBar();
+            QScrollBar *vertical_bar_hex = ui->textBrowser_serial_hex->verticalScrollBar();
             if(ui->checkBox_autoScroll->isChecked())
             {
-                vertical_bar->setValue(vertical_bar->maximum());
+                vertical_bar_ascii->setValue(vertical_bar_ascii->maximum());
+                vertical_bar_hex->setValue(vertical_bar_hex->maximum());
             }
             else
             {
                 // Return to previous cursor and scroll position
-                ui->textBrowser_serial->setTextCursor(original_cursor_position);
-                vertical_bar->setValue(original_scroll_position);
+                ui->textBrowser_serial_ascii->setTextCursor(original_cursor_pos_ascii);
+                ui->textBrowser_serial_hex->setTextCursor(original_cursor_pos_hex);
+                vertical_bar_ascii->setValue(original_scroll_pos_ascii);
+                vertical_bar_hex->setValue(original_scroll_pos_hex);
             }
         }
         else
@@ -312,17 +357,33 @@ void MainWindow::SerialReceive(void)
             // For each line of received data
             for(int i = 0; i < lines.size(); i++)
             {
-                // Format line data (join time, data and eol)
-                QByteArray to_print = lines[i];
+                // Get the ASCII data line
+                QByteArray to_print_ascii = lines[i];
+
+                // Get the HEX data line and format it to string
+                QByteArray to_print_hex = lines[i].toHex();
+                to_print_hex = to_print_hex.toUpper();
+                if(to_print_hex.length() > 2)
+                {
+                    // Add spaces between pair of bytes of hex data (convert "A2345F" to "A2 34 5F")
+                    for(int i = 2; i < to_print_hex.length()-1; i = i + 3)
+                        to_print_hex.insert(i, " ");
+                }
 
                 // Add time to data if it is not the first line
                 if(i != 0)
-                    to_print = to_print.prepend(qba_time);
+                {
+                    to_print_ascii = to_print_ascii.prepend(qba_time);
+                    to_print_hex = to_print_hex.prepend(qba_time);
+                }
                 else
                 {
                     // Add time to data if the last written line has an end of line
                     if(last_line_was_eol)
-                        to_print = to_print.prepend(qba_time);
+                    {
+                        to_print_ascii = to_print_ascii.prepend(qba_time);
+                        to_print_hex = to_print_hex.prepend(qba_time);
+                    }
                     else
                         last_line_was_eol = false;
                 }
@@ -330,7 +391,10 @@ void MainWindow::SerialReceive(void)
                 bool ignore_last_split_line = false;
                 // Recover lost EOL due to split if it is not the last line
                 if(i < lines.size()-1)
-                    to_print = to_print.append(qba_eol);
+                {
+                    to_print_ascii = to_print_ascii.append(qba_eol);
+                    to_print_hex = to_print_hex.append(" 0A" + qba_eol);
+                }
                 else
                 {
                     // Data last character is an EOL
@@ -346,20 +410,25 @@ void MainWindow::SerialReceive(void)
                 // Ignore print this line
                 if(!ignore_last_split_line)
                 {
-                    // Write the line to textbox
-                    ui->textBrowser_serial->insertPlainText(to_print);
+                    // Write data line to ASCII and HEX textboxes
+                    ui->textBrowser_serial_ascii->insertPlainText(to_print_ascii);
+                    ui->textBrowser_serial_hex->insertPlainText(to_print_hex);
 
                     // If Autoscroll is checked, scroll to bottom
-                    QScrollBar *vertical_bar = ui->textBrowser_serial->verticalScrollBar();
+                    QScrollBar *vertical_bar_ascii = ui->textBrowser_serial_ascii->verticalScrollBar();
+                    QScrollBar *vertical_bar_hex = ui->textBrowser_serial_hex->verticalScrollBar();
                     if(ui->checkBox_autoScroll->isChecked())
                     {
-                        vertical_bar->setValue(vertical_bar->maximum());
+                        vertical_bar_ascii->setValue(vertical_bar_ascii->maximum());
+                        vertical_bar_hex->setValue(vertical_bar_hex->maximum());
                     }
                     else
                     {
                         // Return to previous cursor and scroll position
-                        ui->textBrowser_serial->setTextCursor(original_cursor_position);
-                        vertical_bar->setValue(original_scroll_position);
+                        ui->textBrowser_serial_ascii->setTextCursor(original_cursor_pos_ascii);
+                        ui->textBrowser_serial_hex->setTextCursor(original_cursor_pos_hex);
+                        vertical_bar_ascii->setValue(original_scroll_pos_ascii);
+                        vertical_bar_hex->setValue(original_scroll_pos_hex);
                     }
                 }
             }
