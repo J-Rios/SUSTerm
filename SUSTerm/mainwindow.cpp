@@ -393,7 +393,12 @@ void MainWindow::SerialReceive(void)
                 if(i < lines.size()-1)
                 {
                     to_print_ascii = to_print_ascii.append(qba_eol);
-                    to_print_hex = to_print_hex.append(" 0A" + qba_eol);
+
+                    // If this line has any data after "[<TIME>] " add a white space before "0A\n"
+                    if(to_print_hex.size() > qba_time.size())
+                        to_print_hex = to_print_hex.append(" 0A" + qba_eol);
+                    else
+                        to_print_hex = to_print_hex.append("0A" + qba_eol);
                 }
                 else
                 {
