@@ -4,6 +4,9 @@
 /**************************************************************************************************/
 
 #include <QMainWindow>
+#include <QTextBrowser>
+#include <QDialog>
+#include <QSize>
 #include <QScrollBar>
 #include <QKeyEvent>
 #include <QDateTime>
@@ -11,7 +14,12 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 
+#include "ui_mainwindow.h"
+#include "constants.h"
+
 /**************************************************************************************************/
+
+enum terminal_modes { ASCII, HEX, ASCII_HEX };
 
 namespace Ui {
 class MainWindow;
@@ -32,11 +40,16 @@ class MainWindow : public QMainWindow
         QStringList qstrl_available_serial_ports;
         QStringList qstrl_send_history;
         int send_history_i;
+        bool timestamp_on;
+        bool timestamp_ms;
+        terminal_modes terminal_mode;
 
         void SerialPortsChecks_timer_init(void);
         void OpenPort(void);
         void ClosePort(void);
         void SerialSend(void);
+        void PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *textBrowser1,
+                               terminal_modes mode);
         QString GetActualSystemTime(void);
 
     private slots:
@@ -49,6 +62,13 @@ class MainWindow : public QMainWindow
         void CBoxBaudsChanged(void);
         bool eventFilter(QObject *target, QEvent *event);
         void SerialPortErrorHandler(void);
+        void MenuBarExitClick(void);
+        void MenuBarTermAsciiClick(void);
+        void MenuBarTermHexClick(void);
+        void MenuBarTermBothAsciiHexClick(void);
+        void MenuBarTimestampClick(void);
+        void MenuBarTimestampMsClick(void);
+        void MenuBarAboutClick(void);
 };
 
 /**************************************************************************************************/
