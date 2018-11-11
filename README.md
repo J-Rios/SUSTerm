@@ -16,12 +16,12 @@ A Simple Universal Serial Terminal) is a free and open GNU-GPL Serial Terminal d
   * Open Source and Free.
 
 ### Install Instructions:
-Windows:
+#### Windows:
   * Download [last version](https://github.com/J-Rios/SUSTerm/releases/download/v1.2/Windows_SUSTerm_v120.zip).
   * Unzip it and place in "C:\Program File (x86)"
   * Create a desktop shortcut of "C:\Program File (x86)\SUSTerm\SUSTerm.exe"
 
-Linux:
+#### Linux:
   * Download last version:
   ```
   $ cd ~
@@ -54,10 +54,10 @@ Linux:
   ```
 
 ### Uninstall Instructions:
-Windows:
+#### Windows:
   * Simply remove directory "C:\Program File (x86)\SUSTerm\".
 
-Linux:
+#### Linux:
   * Remove Application related files:
   ```
   sudo rm -f /usr/bin/SUSTerm
@@ -71,6 +71,32 @@ Do you like this software? Buy me a coffee:
   Paypal - [https://www.paypal.me/josrios](https://www.paypal.me/josrios)
   
   BTC    - 3N9wf3FunR6YNXonquBeWammaBZVzTXTyR
+
+### About build in Linux:
+
+To build this QT project in Linux, remeber that you need to install QSerialPort module.
+
+- Install QT:
+```
+sudo apt-get -y install build-essential
+sudo apt-get -y install qtcreator
+sudo apt-get -y install qt5-default
+sudo apt-get -y install qtbase5-private-dev
+```
+
+- Get QSerialPort module and install it:
+```
+cd ~
+mkdir qtserialport-build
+git clone git://code.qt.io/qt/qtserialport.git
+cd qtserialport
+git checkout v5.11.2
+git branch -a
+cd ../qtserialport-build
+qmake ../qtserialport/qtserialport.pro
+make
+sudo make install
+```
 
 ### Notes:
 - QT version is 5.11.2.
