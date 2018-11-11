@@ -1,0 +1,9 @@
+#!/bin/sh
+
+chmod +x SUSTerm
+mkdir -p /usr/bin
+mkdir -p /usr/share/applications/
+mkdir -p /usr/share/icons/hicolor/256x256/apps
+cp -a SUSTerm.desktop /usr/share/applications/SUSTerm.desktop
+cp -a SUSTerm.png /usr/share/icons/hicolor/256x256/apps/SUSTerm.png
+cp -a SUSTerm /usr/bin/
