@@ -40,7 +40,9 @@ const QString ABOUT_TEXT =
     "SUSTerm (Simple Universal Serial Terminal) is a free and open GNU-GPL software which is " \
     "focused in minimalist and be efficiently fast and easy to use.<br/>" \
     "<br/>" \
-    "This software was developed by J-Rios and you can get the code at:<br/>" \
+    "Actual Version: 1.3<br/>" \
+    "<br/>" \
+    "This software was developed by @J-Rios and you can get the code at:<br/>" \
     "&nbsp;&nbsp;&nbsp;&nbsp;" \
     "<a href=\"https://github.com/J-Rios/SUSTerm\">https://github.com/J-Rios/SUSTerm</a><br/>" \
     "<br/>" \
@@ -48,8 +50,7 @@ const QString ABOUT_TEXT =
     "&nbsp;&nbsp;&nbsp;&nbsp;" \
     "Paypal - <a href=\"https://www.paypal.me/josrios\">https://www.paypal.me/josrios</a><br/>" \
     "&nbsp;&nbsp;&nbsp;&nbsp;" \
-    "BTC    - 3N9wf3FunR6YNXonquBeWammaBZVzTXTyR<br/>" \
-    "<br/>" \
+    "BTC    - 3N9wf3FunR6YNXonquBeWammaBZVzTXTyR" \
     "<p dir=\"rtl\">(: Enjoy this Terminal</p>";
 
 /**************************************************************************************************/
