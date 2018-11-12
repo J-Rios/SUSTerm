@@ -336,7 +336,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
         char data_last_char = serial_data[serial_data.size()-1];
 
         // If there is no an EOL in the received data
-        if(lines.isEmpty() || !timestamp_on)
+        if(lines.isEmpty() && !timestamp_on)
         {
             if(mode == ASCII)
             {
@@ -356,7 +356,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 }
 
                 // Add EOL to HEX data if last value is \n
-                if(serial_data[serial_data.length()-1] == '\n')
+                if(data_last_char == '\n')
                     serial_data_hex.append(qba_eol);
 
                 // Write the received data to ASCII and HEX textboxes
@@ -523,7 +523,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
         char data_last_char = serial_data[serial_data.size()-1];
 
         // If there is no an EOL in the received data
-        if(lines.isEmpty() || !timestamp_on)
+        if(lines.isEmpty() && !timestamp_on)
         {
             // Get the HEX data and format it to string
             QByteArray serial_data_hex = serial_data.toHex();
@@ -536,7 +536,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
             }
 
             // Add EOL to HEX data if last value is \n
-            if(serial_data[serial_data.length()-1] == '\n')
+            if(data_last_char == '\n')
                 serial_data_hex.append(qba_eol);
 
             // Write the received data to ASCII and HEX textboxes
