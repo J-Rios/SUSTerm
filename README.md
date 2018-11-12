@@ -17,7 +17,7 @@ A Simple Universal Serial Terminal) is a free and open GNU-GPL Serial Terminal d
 
 ### Install Instructions:
 #### Windows:
-  * Download [last version](https://github.com/J-Rios/SUSTerm/releases/download/v1.2/Windows_SUSTerm_v120.zip).
+  * Download [last version](https://github.com/J-Rios/SUSTerm/releases/download/v1.3/Windows_SUSTerm_v130.zip).
   * Unzip it and place in "C:\Program File (x86)"
   * Create a desktop shortcut of "C:\Program File (x86)\SUSTerm\SUSTerm.exe"
 
@@ -25,13 +25,13 @@ A Simple Universal Serial Terminal) is a free and open GNU-GPL Serial Terminal d
   * Download last version:
   ```
   $ cd ~
-  $ wget https://github.com/J-Rios/SUSTerm/releases/download/v1.2/Linux_SUSTerm_v120.zip
+  $ wget https://github.com/J-Rios/SUSTerm/releases/download/v1.3/Linux_SUSTerm_v130.zip
   ```
   
   * Unzip it, give execution permission and place it to user binaries apps dir:
   ```
-  $ unzip Linux_SUSTerm_v120.zip
-  $ cd Linux_SUSTerm_v120
+  $ unzip Linux_SUSTerm_v130.zip
+  $ cd Linux_SUSTerm_v130
   $ sudo chmod +x ./install
   $ sudo ./install
   ```
@@ -39,7 +39,7 @@ A Simple Universal Serial Terminal) is a free and open GNU-GPL Serial Terminal d
   * Remove unnecessary used files:
   ```
   $ cd ~
-  $ rm -rf Linux_SUSTerm_v120*
+  $ rm -rf Linux_SUSTerm_v130*
   ```
   
   * Add actual user to dialout group to allow open serial ports without been root and reboot system to apply:
