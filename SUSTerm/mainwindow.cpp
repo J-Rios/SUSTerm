@@ -340,8 +340,12 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
         {
             if(mode == ASCII)
             {
+                // Remove carriage return characters
+                QString qstr_ascii_data(serial_data);
+                qstr_ascii_data = qstr_ascii_data.remove(QChar('\r'));
+
                 // Write the received data to ASCII and HEX textboxes
-                textBrowser0->insertPlainText(serial_data);
+                textBrowser0->insertPlainText(qstr_ascii_data);
             }
             else
             {
@@ -386,14 +390,18 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                     // Get the ASCII data line
                     QByteArray to_print_ascii = lines[i];
 
+                    // Remove carriage return characters
+                    QString qstr_to_print_ascii(to_print_ascii);
+                    qstr_to_print_ascii = qstr_to_print_ascii.remove(QChar('\r'));
+
                     // Add time to data if it is not the first line
                     if(i != 0)
-                        to_print_ascii = to_print_ascii.prepend(qba_time);
+                        qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
                     else
                     {
                         // Add time to data if the last written line has an end of line
                         if(last_line_was_eol)
-                            to_print_ascii = to_print_ascii.prepend(qba_time);
+                            qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
                         else
                             last_line_was_eol = false;
                     }
@@ -401,7 +409,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                     // Recover lost EOL due to split if it is not the last line
                     bool ignore_last_split_line = false;
                     if(i < lines.size()-1)
-                        to_print_ascii = to_print_ascii.append(qba_eol);
+                        qstr_to_print_ascii = qstr_to_print_ascii.append(qba_eol);
                     else
                     {
                         // Data last character is an EOL
@@ -418,7 +426,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                     if(!ignore_last_split_line)
                     {
                         // Write data line to textbox
-                        textBrowser0->insertPlainText(to_print_ascii);
+                        textBrowser0->insertPlainText(qstr_to_print_ascii);
 
                         // If Autoscroll is checked, scroll to bottom
                         QScrollBar *vertical_bar = textBrowser0->verticalScrollBar();
@@ -535,12 +543,16 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                     serial_data_hex.insert(i, " ");
             }
 
+            // Remove carriage return characters
+            QString qstr_ascii_data(serial_data);
+            qstr_ascii_data = qstr_ascii_data.remove(QChar('\r'));
+
             // Add EOL to HEX data if last value is \n
             if(data_last_char == '\n')
                 serial_data_hex.append(qba_eol);
 
             // Write the received data to ASCII and HEX textboxes
-            textBrowser0->insertPlainText(serial_data);
+            textBrowser0->insertPlainText(qstr_ascii_data);
             textBrowser1->insertPlainText(serial_data_hex);
 
             // If Autoscroll is checked, scroll to bottom
@@ -570,6 +582,10 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 // Get the ASCII data line
                 QByteArray to_print_ascii = lines[i];
 
+                // Remove carriage return characters
+                QString qstr_to_print_ascii(to_print_ascii);
+                qstr_to_print_ascii = qstr_to_print_ascii.remove(QChar('\r'));
+
                 // Get the HEX data line and format it to string
                 QByteArray to_print_hex = lines[i].toHex();
                 to_print_hex = to_print_hex.toUpper();
@@ -583,7 +599,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 // Add time to data if it is not the first line
                 if(i != 0)
                 {
-                    to_print_ascii = to_print_ascii.prepend(qba_time);
+                    qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
                     to_print_hex = to_print_hex.prepend(qba_time);
                 }
                 else
@@ -591,7 +607,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                     // Add time to data if the last written line has an end of line
                     if(last_line_was_eol)
                     {
-                        to_print_ascii = to_print_ascii.prepend(qba_time);
+                        qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
                         to_print_hex = to_print_hex.prepend(qba_time);
                     }
                     else
@@ -602,7 +618,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 // Recover lost EOL due to split if it is not the last line
                 if(i < lines.size()-1)
                 {
-                    to_print_ascii = to_print_ascii.append(qba_eol);
+                    qstr_to_print_ascii = qstr_to_print_ascii.append(qba_eol);
 
                     // If this line has any data after "[<TIME>] " add a white space before "0A\n"
                     if(to_print_hex.size() > qba_time.size())
@@ -626,7 +642,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 if(!ignore_last_split_line)
                 {
                     // Write data line to ASCII and HEX textboxes
-                    textBrowser0->insertPlainText(to_print_ascii);
+                    textBrowser0->insertPlainText(qstr_to_print_ascii);
                     textBrowser1->insertPlainText(to_print_hex);
 
                     // If Autoscroll is checked, scroll to bottom
