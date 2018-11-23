@@ -368,10 +368,6 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 serial_data_hex = serial_data_hex.toUpper();
                 qDebug("Hex to print: %s", serial_data_hex.data());
 
-                // If in this line we have yet 2 bytes printed, add a space before new data
-                //if(hex_line_num_chars % 2)
-                    //serial_data_hex.prepend(' ');
-
                 // If data to print is more than 2 bytes
                 if(serial_data_hex.length() > 2)
                 {
@@ -380,16 +376,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                         serial_data_hex.insert(i, " ");
                 }
                 serial_data_hex.append(' ');
-
-                //hex_line_num_chars = hex_line_num_chars + static_cast<uint32_t>(serial_data_hex.length());
-
-                // Add EOL to HEX data if last value is \n
-                /*if(data_last_char == '\n')
-                {
-                    serial_data_hex.append(qba_eol);
-                    hex_line_num_chars = 0;
-                }*/
-
+                
                 // Write the received data to ASCII and HEX textboxes
                 textBrowser0->insertPlainText(serial_data_hex);
             }
@@ -499,17 +486,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
 
                     // Add time to data if it is not the first line
                     if(i != 0)
-                    {
                         to_print_hex = to_print_hex.prepend(qba_time);
-
-                        // If it is the last line
-                        /*if(i == num_lines-1)
-                        {
-                            // If this line doesnt end with a EOL, add a space
-                            if(!lines[i].contains('\n'))
-                                to_print_hex.append(' ');
-                        }*/
-                    }
                     else
                     {
                         // Add time to data if the last written line has an end of line
@@ -523,12 +500,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                     bool ignore_last_split_line = false;
                     if(i < num_lines-1)
                     {
-                        // If this line has any data after "[<TIME>] " add a white space before "0A\n"
-                        /*if(to_print_hex.size() > qba_time.size())
-                            to_print_hex = to_print_hex.append(" 0A" + qba_eol);
-                        else*/
-                            to_print_hex = to_print_hex.append("0A" + qba_eol);
-
+                        to_print_hex = to_print_hex.append("0A" + qba_eol);
                         hex_line_num_chars = 0;
                     }
                     else
@@ -677,14 +649,6 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 {
                     qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
                     to_print_hex = to_print_hex.prepend(qba_time);
-
-                    // If it is the last line
-                    /*if(i == num_lines-1)
-                    {
-                        // If this line doesnt end with a EOL, add a space
-                        if(!lines[i].contains('\n'))
-                            to_print_hex.append(' ');
-                    }*/
                 }
                 else
                 {
@@ -703,12 +667,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 if(i < num_lines-1)
                 {
                     qstr_to_print_ascii = qstr_to_print_ascii.append(qba_eol);
-
-                    // If this line has any data after "[<TIME>] " add a white space before "0A\n"
-                    /*if(to_print_hex.size() > qba_time.size())
-                        to_print_hex = to_print_hex.append(" 0A" + qba_eol);
-                    else*/
-                        to_print_hex = to_print_hex.append("0A" + qba_eol);
+                    to_print_hex = to_print_hex.append("0A" + qba_eol);
                 }
                 else
                 {
