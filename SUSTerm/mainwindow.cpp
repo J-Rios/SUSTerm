@@ -7,14 +7,14 @@
 // Main Window Constructor
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    qDebug("\nApp start.\n");
+    debug_print("\nApp start.\n");
 
-    qDebug("Setup process start.");
+    debug_print("Setup process start.");
 
-    qDebug("Initializing App Window...");
+    debug_print("Initializing App Window...");
     ui->setupUi(this);
 
-    qDebug("Setting initial UI elements values...");
+    debug_print("Setting initial UI elements values...");
 
     // ComboBox_EOL initialization
     ui->comboBox_EOL->addItems(comboBox_EOL_values);
@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->textBrowser_serial_1->hide();
     ui->lineEdit_toSend->setFocus();
 
-    qDebug("Connecting events signals...");
+    debug_print("Connecting events signals...");
 
     // UI elements user interactions signals event setup
     connect(ui->pushButton_open, SIGNAL(released()), this, SLOT(ButtonOpenPressed()));
@@ -96,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             this, [=](){SerialPortErrorHandler();});
 
     // Setup and start timer for Serial Ports checks
-    qDebug("Initializing Serial Ports check timer...");
+    debug_print("Initializing Serial Ports check timer...");
     SerialPortsChecks_timer_init();
 
     // Add an event filter to catch keyboard signals with an eventFilter() handler
@@ -105,7 +105,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Inicial send history index to -1
     send_history_i = -1;
 
-    qDebug("Setup process end.\n");
+    debug_print("Setup process end.\n");
 }
 
 // Main Window Destructor
@@ -126,7 +126,7 @@ MainWindow::~MainWindow()
         if((serial_port->isWritable()) || (serial_port->isReadable()))
         {
             serial_port->close();
-            qDebug("Port successfully close.");
+            debug_print("Port successfully close.");
         }
 
         delete serial_port;
@@ -136,7 +136,7 @@ MainWindow::~MainWindow()
     // Release UI
     delete ui;
 
-    qDebug("\nApp end.");
+    debug_print("\nApp end.");
 }
 
 /**************************************************************************************************/
@@ -194,14 +194,14 @@ void MainWindow::SerialPortsCheck(void)
 // Button Open pressed event handler
 void MainWindow::ButtonOpenPressed(void)
 {
-    qDebug("Open Button pressed.");
+    debug_print("Open Button pressed.");
     OpenPort();
 }
 
 // Button Close pressed event handler
 void MainWindow::ButtonClosePressed(void)
 {
-    qDebug("Close Button pressed.");
+    debug_print("Close Button pressed.");
     ClosePort();
 }
 
@@ -211,20 +211,20 @@ void MainWindow::OpenPort(void)
     QString selected_port = ui->comboBox_SerialPort->currentText();
     if((selected_port.isNull()) || (selected_port.isEmpty()))
     {
-        qDebug("Port is null or empty");
+        debug_print("Port is null or empty");
         return;
     }
 
     QString selected_bauds = ui->comboBox_bauds->currentText();
     if((selected_bauds.isNull()) || (selected_bauds.isEmpty()))
     {
-        qDebug("Bauds is null or empty");
+        debug_print("Bauds is null or empty");
         return;
     }
 
     QByteArray qba_port = selected_port.toUtf8();
     QByteArray qba_selected_bauds = selected_bauds.toUtf8();
-    qDebug("Trying to open port %s at %s bauds.", qba_port.data(), qba_selected_bauds.data());
+    debug_print("Trying to open port %s at %s bauds.", qba_port.data(), qba_selected_bauds.data());
     serial_port->setPortName(selected_port);
     if(serial_port->open(QIODevice::ReadWrite))
     {
@@ -249,7 +249,7 @@ void MainWindow::OpenPort(void)
 
         ui->lineEdit_toSend->setFocus();
 
-        qDebug("Port successfully open.");
+        debug_print("Port successfully open.");
     }
 }
 
@@ -260,7 +260,7 @@ void MainWindow::ClosePort(void)
     if((serial_port->isWritable()) || (serial_port->isReadable()))
     {
         serial_port->close();
-        qDebug("Port successfully close.");
+        debug_print("Port successfully close.");
 
         ui->label_status->setStyleSheet("QLabel { color : black; }");
         ui->label_status->setText("Status: Disconnected.");
@@ -281,12 +281,12 @@ void MainWindow::ClosePort(void)
 // ComboBox Bauds change event handler
 void MainWindow::CBoxBaudsChanged(void)
 {
-    qDebug("Bauds changed.");
+    debug_print("Bauds changed.");
 
     // Close the port if it is already open
     if((serial_port->isWritable()) || (serial_port->isReadable()))
     {
-        qDebug("Reconnecting to port using new baudrate.");
+        debug_print("Reconnecting to port using new baudrate.");
         ClosePort();
         OpenPort();
     }
@@ -295,7 +295,7 @@ void MainWindow::CBoxBaudsChanged(void)
 // ComboBox EOL change event handler
 void MainWindow::CBoxEOLChanged(void)
 {
-    qDebug("Send EOL changed.");
+    debug_print("Send EOL changed.");
 
     ui->lineEdit_toSend->setFocus();
 }
@@ -307,7 +307,7 @@ void MainWindow::CBoxEOLChanged(void)
 // Button clear event handler
 void MainWindow::ButtonClearPressed(void)
 {
-    qDebug("Clear Button pressed.");
+    debug_print("Clear Button pressed.");
     ui->textBrowser_serial_0->clear();
     ui->textBrowser_serial_1->clear();
     ui->lineEdit_toSend->setFocus();
@@ -350,7 +350,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
         // Get the received data and split it by lines
         QByteArray serial_data = serial_port->readAll();
         QList<QByteArray> lines = serial_data.split('\n');
-        //qDebug("Received data: %s", serial_data.toHex().data());
+        //debug_print("Received data: %s", serial_data.toHex().data());
 
         // Get data last character
         char data_last_char = serial_data[serial_data.size()-1];
@@ -677,7 +677,7 @@ QString MainWindow::GetActualSystemTime(void)
 // Button Send pressed event handler
 void MainWindow::ButtonSendPressed(void)
 {
-    qDebug("Send Button pressed.");
+    debug_print("Send Button pressed.");
     SerialSend();
     ui->lineEdit_toSend->clear();
     ui->lineEdit_toSend->setFocus();
@@ -690,7 +690,7 @@ void MainWindow::SerialSend(void)
     QString qstr_to_send = ui->lineEdit_toSend->text();
     if((qstr_to_send.isNull()) || (qstr_to_send.isEmpty()))
     {
-        qDebug("Data to send box is null or empty");
+        debug_print("Data to send box is null or empty");
         return;
     }
 
@@ -772,7 +772,7 @@ void MainWindow::SerialPortErrorHandler(void)
     if(serial_port->error() != QSerialPort::NoError)
     {
         QByteArray qba_error = serial_port->errorString().toUtf8();
-        qDebug("Error - %s\n", qba_error.data());
+        debug_print("Error - %s\n", qba_error.data());
 
         ui->label_status->setStyleSheet("QLabel { color : red; }");
         ui->label_status->setText("Status: " + serial_port->errorString());

@@ -7,6 +7,14 @@
 
 /**************************************************************************************************/
 
+/* Debug Enable/Disable and Macro */
+
+#define DEBUG true
+
+#define debug_print(...) do { if(DEBUG) qDebug(__VA_ARGS__); } while (0)
+
+/**************************************************************************************************/
+
 QStringList static comboBox_EOL_values =
 {
     "No Line Ending",
