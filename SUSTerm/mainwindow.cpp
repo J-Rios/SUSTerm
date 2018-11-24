@@ -48,6 +48,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->lineEdit_toSend, SIGNAL(returnPressed()), this, SLOT(ButtonSendPressed()));
     connect(ui->comboBox_bauds, SIGNAL(currentIndexChanged(const QString &)), this,
             SLOT(CBoxBaudsChanged()));
+    connect(ui->comboBox_EOL, SIGNAL(currentIndexChanged(const QString &)), this,
+            SLOT(CBoxEOLChanged()));
     connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(MenuBarExitClick()));
     connect(ui->actionASCII_Terminal, SIGNAL(triggered()), this, SLOT(MenuBarTermAsciiClick()));
     connect(ui->actionHEX_Terminal, SIGNAL(triggered()), this, SLOT(MenuBarTermHexClick()));
@@ -274,7 +276,7 @@ void MainWindow::ClosePort(void)
 
 /**************************************************************************************************/
 
-/* Bauds change */
+/* Bauds and Send EOL bytes change */
 
 // ComboBox Bauds change event handler
 void MainWindow::CBoxBaudsChanged(void)
@@ -288,6 +290,14 @@ void MainWindow::CBoxBaudsChanged(void)
         ClosePort();
         OpenPort();
     }
+}
+
+// ComboBox EOL change event handler
+void MainWindow::CBoxEOLChanged(void)
+{
+    qDebug("Send EOL changed.");
+
+    ui->lineEdit_toSend->setFocus();
 }
 
 /**************************************************************************************************/
@@ -670,6 +680,7 @@ void MainWindow::ButtonSendPressed(void)
     qDebug("Send Button pressed.");
     SerialSend();
     ui->lineEdit_toSend->clear();
+    ui->lineEdit_toSend->setFocus();
 }
 
 // Serial send data from lineEdit box

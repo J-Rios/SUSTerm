@@ -60,6 +60,7 @@ class MainWindow : public QMainWindow
         void ButtonSendPressed(void);
         void SerialReceive(void);
         void CBoxBaudsChanged(void);
+        void CBoxEOLChanged(void);
         bool eventFilter(QObject *target, QEvent *event);
         void SerialPortErrorHandler(void);
         void MenuBarExitClick(void);
