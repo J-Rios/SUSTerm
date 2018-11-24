@@ -342,324 +342,12 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
         QList<QByteArray> lines = serial_data.split('\n');
         //qDebug("Received data: %s", serial_data.toHex().data());
 
-        // Determine if the received data has an EOL
-        bool received_has_eol = false;
-        if(lines.length() > 1)
-            received_has_eol = true;
-        else if(lines.length() == 1)
-        {
-            if(serial_data.contains('\n'))
-                received_has_eol = true;
-        }
-
         // Get data last character
         char data_last_char = serial_data[serial_data.size()-1];
+        static bool last_line_was_eol = false;
 
-        // If there is no an EOL in the received data
-        if(!received_has_eol/* && !timestamp_on*/)
+        if(mode == ASCII)
         {
-            if(mode == ASCII)
-            {
-                // Remove carriage return characters
-                QString qstr_ascii_data(serial_data);
-                qstr_ascii_data = qstr_ascii_data.remove(QChar('\r'));
-
-                // Convert all non-basic printable ASCII characters to ? symbol (ASCII 63)
-                ushort ascii_num;
-                for(int i = 0; i < qstr_ascii_data.length(); i++)
-                {
-                    ascii_num = qstr_ascii_data[i].unicode();
-                    if((ascii_num < 32) || (ascii_num > 126))
-                    {
-                        // If actual char is not end of line ('\n')
-                        if(ascii_num != 10)
-                            qstr_ascii_data[i] = 63;
-                    }
-                }
-
-                // Write the received data to ASCII and HEX textboxes
-                textBrowser0->insertPlainText(qstr_ascii_data);
-            }
-            else
-            {
-                // Get the HEX data and format it to string
-                QByteArray serial_data_hex = serial_data.toHex();
-                serial_data_hex = serial_data_hex.toUpper();
-
-                // If data to print is more than 2 bytes
-                if(serial_data_hex.length() > 2)
-                {
-                    // Add spaces between pair of bytes of hex data (convert "A2345F" to "A2 34 5F")
-                    for(int i = 2; i < serial_data_hex.length()-1; i = i + 3)
-                        serial_data_hex.insert(i, " ");
-                }
-                serial_data_hex.append(' ');
-
-                // Write the received data to ASCII and HEX textboxes
-                textBrowser0->insertPlainText(serial_data_hex);
-            }
-
-            // If Autoscroll is checked, scroll to bottom
-            QScrollBar *vertical_bar = textBrowser0->verticalScrollBar();
-            if(ui->checkBox_autoScroll->isChecked())
-                vertical_bar->setValue(vertical_bar->maximum());
-            else
-            {
-                // Return to previous cursor and scroll position
-                textBrowser0->setTextCursor(original_cursor_pos);
-                vertical_bar->setValue(original_scroll_pos);
-            }
-        }
-        else
-        {
-            static bool last_line_was_eol = true;
-
-            if(mode == ASCII)
-            {
-                // For each line of received data
-                int num_lines = lines.length();
-                for(int i = 0; i < num_lines; i++)
-                {
-                    // Get the ASCII data line
-                    QByteArray to_print_ascii = lines[i];
-
-                    // Remove carriage return characters
-                    QString qstr_to_print_ascii(to_print_ascii);
-                    qstr_to_print_ascii = qstr_to_print_ascii.remove(QChar('\r'));
-
-                    // Add time to data if it is not the first line
-                    if(i != 0)
-                        qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
-                    else
-                    {
-                        // Add time to data if the last written line has an end of line
-                        if(last_line_was_eol)
-                            qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
-                        else
-                            last_line_was_eol = false;
-                    }
-
-                    // Recover lost EOL due to split if it is not the last line
-                    bool ignore_last_split_line = false;
-                    if(i < num_lines-1)
-                        qstr_to_print_ascii = qstr_to_print_ascii.append(qba_eol);
-                    else
-                    {
-                        // Data last character is an EOL
-                        if(data_last_char == '\n')
-                        {
-                            ignore_last_split_line = true;
-                            last_line_was_eol = true;
-                        }
-                        else
-                            last_line_was_eol = false;
-                    }
-
-                    // Ignore print this line
-                    if(!ignore_last_split_line)
-                    {
-                        // Convert all non-basic printable ASCII characters to ? symbol (ASCII 63)
-                        ushort ascii_num;
-                        for(int i = 0; i < qstr_to_print_ascii.length(); i++)
-                        {
-                            ascii_num = qstr_to_print_ascii[i].unicode();
-                            if((ascii_num < 32) || (ascii_num > 126))
-                            {
-                                // If actual char is not end of line ('\n')
-                                if(ascii_num != 10)
-                                    qstr_to_print_ascii[i] = 63;
-                            }
-                        }
-
-                        // Write data line to textbox
-                        textBrowser0->insertPlainText(qstr_to_print_ascii);
-
-                        // If Autoscroll is checked, scroll to bottom
-                        QScrollBar *vertical_bar = textBrowser0->verticalScrollBar();
-                        if(ui->checkBox_autoScroll->isChecked())
-                            vertical_bar->setValue(vertical_bar->maximum());
-                        else
-                        {
-                            // Return to previous cursor and scroll position
-                            textBrowser0->setTextCursor(original_cursor_pos);
-                            vertical_bar->setValue(original_scroll_pos);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // For each line of received data
-                int num_lines = lines.length();
-                for(int i = 0; i < num_lines; i++)
-                {
-                    // Get the HEX data line and format it to string
-                    QByteArray to_print_hex = lines[i].toHex();
-                    to_print_hex = to_print_hex.toUpper();
-
-                    // If in this line we have yet 2 bytes printed, add a space before new data
-                    if(hex_line_num_chars % 2)
-                        to_print_hex.prepend(' ');
-
-                    if(to_print_hex.length() > 2)
-                    {
-                        // Add spaces between pair of bytes of hex data (convert "A2345F" to "A2 34 5F")
-                        for(int ii = 2; ii < to_print_hex.length()-1; ii = ii + 3)
-                            to_print_hex.insert(ii, " ");
-                       to_print_hex.append(' ');
-                    }
-                    else if (to_print_hex.length() == 2)
-                    {
-                        // If there is just one byte and is an EOL, add a space
-                        if(lines[i][0] != '\n')
-                            to_print_hex.append(' ');
-                    }
-
-                    // Add time to data if it is not the first line
-                    if(i != 0)
-                        to_print_hex = to_print_hex.prepend(qba_time);
-                    else
-                    {
-                        // Add time to data if the last written line has an end of line
-                        if(last_line_was_eol)
-                            to_print_hex = to_print_hex.prepend(qba_time);
-                        else
-                            last_line_was_eol = false;
-                    }
-
-                    // Recover lost EOL due to split if it is not the last line
-                    bool ignore_last_split_line = false;
-                    if(i < num_lines-1)
-                    {
-                        to_print_hex = to_print_hex.append("0A" + qba_eol);
-                        hex_line_num_chars = 0;
-                    }
-                    else
-                    {
-                        // Data last character is an EOL
-                        if(data_last_char == '\n')
-                        {
-                            ignore_last_split_line = true;
-                            last_line_was_eol = true;
-                        }
-                        else
-                            last_line_was_eol = false;
-                    }
-
-                    // Ignore print this line
-                    if(!ignore_last_split_line)
-                    {
-                        // Write data line to textbox
-                        textBrowser0->insertPlainText(to_print_hex);
-
-                        // If Autoscroll is checked, scroll to bottom
-                        QScrollBar *vertical_bar = textBrowser0->verticalScrollBar();
-                        if(ui->checkBox_autoScroll->isChecked())
-                            vertical_bar->setValue(vertical_bar->maximum());
-                        else
-                        {
-                            // Return to previous cursor and scroll position
-                            textBrowser0->setTextCursor(original_cursor_pos);
-                            vertical_bar->setValue(original_scroll_pos);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    else if (mode == ASCII_HEX)
-    {
-        // Get original cursor and scroll position
-        QTextCursor original_cursor_pos_ascii = textBrowser0->textCursor();
-        QTextCursor original_cursor_pos_hex = textBrowser1->textCursor();
-        int original_scroll_pos_ascii = textBrowser0->verticalScrollBar()->value();
-        int original_scroll_pos_hex = textBrowser1->verticalScrollBar()->value();
-
-        // Set textbox cursor to bottom
-        QTextCursor new_cursor_ascii = original_cursor_pos_ascii;
-        QTextCursor new_cursor_hex = original_cursor_pos_hex;
-        new_cursor_ascii.movePosition(QTextCursor::End);
-        new_cursor_hex.movePosition(QTextCursor::End);
-        textBrowser0->setTextCursor(new_cursor_ascii);
-        textBrowser1->setTextCursor(new_cursor_hex);
-
-        // Get the received data and split it by lines
-        QByteArray serial_data = serial_port->readAll();
-        QList<QByteArray> lines = serial_data.split('\n');
-
-        // Determine if the received data has an EOL
-        bool received_has_eol = false;
-        if(lines.length() > 1)
-            received_has_eol = true;
-        else if(lines.length() == 1)
-        {
-            if(serial_data.contains('\n'))
-                received_has_eol = true;
-        }
-
-        // Get data last character
-        char data_last_char = serial_data[serial_data.size()-1];
-
-        // If there is no an EOL in the received data
-        if(!received_has_eol)
-        {
-            // Get the HEX data and format it to string
-            QByteArray serial_data_hex = serial_data.toHex();
-            serial_data_hex = serial_data_hex.toUpper();
-            if(serial_data_hex.length() > 2)
-            {
-                // Add spaces between pair of bytes of hex data (convert "A2345F" to "A2 34 5F")
-                for(int i = 2; i < serial_data_hex.length()-1; i = i + 3)
-                    serial_data_hex.insert(i, " ");
-            }
-            serial_data_hex.append(' ');
-
-            // Remove carriage return characters
-            QString qstr_ascii_data(serial_data);
-            qstr_ascii_data = qstr_ascii_data.remove(QChar('\r'));
-
-            // Convert all non-basic printable ASCII characters to ? symbol (ASCII 63)
-            ushort ascii_num;
-            for(int i = 0; i < qstr_ascii_data.length(); i++)
-            {
-                ascii_num = qstr_ascii_data[i].unicode();
-                if((ascii_num < 32) || (ascii_num > 126))
-                {
-                    // If actual char is not end of line ('\n')
-                    if(ascii_num != 10)
-                        qstr_ascii_data[i] = 63;
-                }
-            }
-
-            // Add EOL to HEX data if last value is \n
-            if(data_last_char == '\n')
-                serial_data_hex.append(qba_eol);
-
-            // Write the received data to ASCII and HEX textboxes
-            textBrowser0->insertPlainText(qstr_ascii_data);
-            textBrowser1->insertPlainText(serial_data_hex);
-
-            // If Autoscroll is checked, scroll to bottom
-            QScrollBar *vertical_bar_ascii = textBrowser0->verticalScrollBar();
-            QScrollBar *vertical_bar_hex = textBrowser1->verticalScrollBar();
-            if(ui->checkBox_autoScroll->isChecked())
-            {
-                vertical_bar_ascii->setValue(vertical_bar_ascii->maximum());
-                vertical_bar_hex->setValue(vertical_bar_hex->maximum());
-            }
-            else
-            {
-                // Return to previous cursor and scroll position
-                textBrowser0->setTextCursor(original_cursor_pos_ascii);
-                textBrowser1->setTextCursor(original_cursor_pos_hex);
-                vertical_bar_ascii->setValue(original_scroll_pos_ascii);
-                vertical_bar_hex->setValue(original_scroll_pos_hex);
-            }
-        }
-        else
-        {
-            static bool last_line_was_eol = true;
-
             // For each line of received data
             int num_lines = lines.length();
             for(int i = 0; i < num_lines; i++)
@@ -671,48 +359,22 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 QString qstr_to_print_ascii(to_print_ascii);
                 qstr_to_print_ascii = qstr_to_print_ascii.remove(QChar('\r'));
 
-                // Get the HEX data line and format it to string
-                QByteArray to_print_hex = lines[i].toHex();
-                to_print_hex = to_print_hex.toUpper();
-                if(to_print_hex.length() > 2)
-                {
-                    // Add spaces between pair of bytes of hex data (convert "A2345F" to "A2 34 5F")
-                    for(int ii = 2; ii < to_print_hex.length()-1; ii = ii + 3)
-                        to_print_hex.insert(ii, " ");
-                    to_print_hex.append(' ');
-                 }
-                 else if (to_print_hex.length() == 2)
-                 {
-                     // If there is just one byte and is an EOL, add a space
-                     if(lines[i][0] != '\n')
-                         to_print_hex.append(' ');
-                 }
-
                 // Add time to data if it is not the first line
                 if(i != 0)
-                {
                     qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
-                    to_print_hex = to_print_hex.prepend(qba_time);
-                }
                 else
                 {
                     // Add time to data if the last written line has an end of line
                     if(last_line_was_eol)
-                    {
                         qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
-                        to_print_hex = to_print_hex.prepend(qba_time);
-                    }
                     else
                         last_line_was_eol = false;
                 }
 
-                bool ignore_last_split_line = false;
                 // Recover lost EOL due to split if it is not the last line
+                bool ignore_last_split_line = false;
                 if(i < num_lines-1)
-                {
                     qstr_to_print_ascii = qstr_to_print_ascii.append(qba_eol);
-                    to_print_hex = to_print_hex.append("0A" + qba_eol);
-                }
                 else
                 {
                     // Data last character is an EOL
@@ -741,26 +403,225 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                         }
                     }
 
-                    // Write data line to ASCII and HEX textboxes
+                    // Write data line to textbox
                     textBrowser0->insertPlainText(qstr_to_print_ascii);
-                    textBrowser1->insertPlainText(to_print_hex);
 
                     // If Autoscroll is checked, scroll to bottom
-                    QScrollBar *vertical_bar_ascii = textBrowser0->verticalScrollBar();
-                    QScrollBar *vertical_bar_hex = textBrowser1->verticalScrollBar();
+                    QScrollBar *vertical_bar = textBrowser0->verticalScrollBar();
                     if(ui->checkBox_autoScroll->isChecked())
-                    {
-                        vertical_bar_ascii->setValue(vertical_bar_ascii->maximum());
-                        vertical_bar_hex->setValue(vertical_bar_hex->maximum());
-                    }
+                        vertical_bar->setValue(vertical_bar->maximum());
                     else
                     {
                         // Return to previous cursor and scroll position
-                        textBrowser0->setTextCursor(original_cursor_pos_ascii);
-                        textBrowser1->setTextCursor(original_cursor_pos_hex);
-                        vertical_bar_ascii->setValue(original_scroll_pos_ascii);
-                        vertical_bar_hex->setValue(original_scroll_pos_hex);
+                        textBrowser0->setTextCursor(original_cursor_pos);
+                        vertical_bar->setValue(original_scroll_pos);
                     }
+                }
+            }
+        }
+        else
+        {
+            // For each line of received data
+            int num_lines = lines.length();
+            for(int i = 0; i < num_lines; i++)
+            {
+                // Get the HEX data line and format it to string
+                QByteArray to_print_hex = lines[i].toHex();
+                to_print_hex = to_print_hex.toUpper();
+
+                // If in this line we have yet 2 bytes printed, add a space before new data
+                if(hex_line_num_chars % 2)
+                    to_print_hex.prepend(' ');
+
+                if(to_print_hex.length() > 2)
+                {
+                    // Add spaces between pair of bytes of hex data (convert "A2345F" to "A2 34 5F")
+                    for(int ii = 2; ii < to_print_hex.length()-1; ii = ii + 3)
+                        to_print_hex.insert(ii, " ");
+                   to_print_hex.append(' ');
+                }
+                else if (to_print_hex.length() == 2)
+                {
+                    // If there is just one byte and is an EOL, add a space
+                    if(lines[i][0] != '\n')
+                        to_print_hex.append(' ');
+                }
+
+                // Add time to data if it is not the first line
+                if(i != 0)
+                    to_print_hex = to_print_hex.prepend(qba_time);
+                else
+                {
+                    // Add time to data if the last written line has an end of line
+                    if(last_line_was_eol)
+                        to_print_hex = to_print_hex.prepend(qba_time);
+                    else
+                        last_line_was_eol = false;
+                }
+
+                // Recover lost EOL due to split if it is not the last line
+                bool ignore_last_split_line = false;
+                if(i < num_lines-1)
+                {
+                    to_print_hex = to_print_hex.append("0A" + qba_eol);
+                    hex_line_num_chars = 0;
+                }
+                else
+                {
+                    // Data last character is an EOL
+                    if(data_last_char == '\n')
+                    {
+                        ignore_last_split_line = true;
+                        last_line_was_eol = true;
+                    }
+                    else
+                        last_line_was_eol = false;
+                }
+
+                // Ignore print this line
+                if(!ignore_last_split_line)
+                {
+                    // Write data line to textbox
+                    textBrowser0->insertPlainText(to_print_hex);
+
+                    // If Autoscroll is checked, scroll to bottom
+                    QScrollBar *vertical_bar = textBrowser0->verticalScrollBar();
+                    if(ui->checkBox_autoScroll->isChecked())
+                        vertical_bar->setValue(vertical_bar->maximum());
+                    else
+                    {
+                        // Return to previous cursor and scroll position
+                        textBrowser0->setTextCursor(original_cursor_pos);
+                        vertical_bar->setValue(original_scroll_pos);
+                    }
+                }
+            }
+        }
+    }
+    else if (mode == ASCII_HEX)
+    {
+        // Get original cursor and scroll position
+        QTextCursor original_cursor_pos_ascii = textBrowser0->textCursor();
+        QTextCursor original_cursor_pos_hex = textBrowser1->textCursor();
+        int original_scroll_pos_ascii = textBrowser0->verticalScrollBar()->value();
+        int original_scroll_pos_hex = textBrowser1->verticalScrollBar()->value();
+
+        // Set textbox cursor to bottom
+        QTextCursor new_cursor_ascii = original_cursor_pos_ascii;
+        QTextCursor new_cursor_hex = original_cursor_pos_hex;
+        new_cursor_ascii.movePosition(QTextCursor::End);
+        new_cursor_hex.movePosition(QTextCursor::End);
+        textBrowser0->setTextCursor(new_cursor_ascii);
+        textBrowser1->setTextCursor(new_cursor_hex);
+
+        // Get the received data and split it by lines
+        QByteArray serial_data = serial_port->readAll();
+        QList<QByteArray> lines = serial_data.split('\n');
+
+        // Get data last character
+        char data_last_char = serial_data[serial_data.size()-1];
+        static bool last_line_was_eol = true;
+
+        // For each line of received data
+        int num_lines = lines.length();
+        for(int i = 0; i < num_lines; i++)
+        {
+            // Get the ASCII data line
+            QByteArray to_print_ascii = lines[i];
+
+            // Remove carriage return characters
+            QString qstr_to_print_ascii(to_print_ascii);
+            qstr_to_print_ascii = qstr_to_print_ascii.remove(QChar('\r'));
+
+            // Get the HEX data line and format it to string
+            QByteArray to_print_hex = lines[i].toHex();
+            to_print_hex = to_print_hex.toUpper();
+            if(to_print_hex.length() > 2)
+            {
+                // Add spaces between pair of bytes of hex data (convert "A2345F" to "A2 34 5F")
+                for(int ii = 2; ii < to_print_hex.length()-1; ii = ii + 3)
+                    to_print_hex.insert(ii, " ");
+                to_print_hex.append(' ');
+             }
+             else if (to_print_hex.length() == 2)
+             {
+                 // If there is just one byte and is an EOL, add a space
+                 if(lines[i][0] != '\n')
+                     to_print_hex.append(' ');
+             }
+
+            // Add time to data if it is not the first line
+            if(i != 0)
+            {
+                qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
+                to_print_hex = to_print_hex.prepend(qba_time);
+            }
+            else
+            {
+                // Add time to data if the last written line has an end of line
+                if(last_line_was_eol)
+                {
+                    qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
+                    to_print_hex = to_print_hex.prepend(qba_time);
+                }
+                else
+                    last_line_was_eol = false;
+            }
+
+            bool ignore_last_split_line = false;
+            // Recover lost EOL due to split if it is not the last line
+            if(i < num_lines-1)
+            {
+                qstr_to_print_ascii = qstr_to_print_ascii.append(qba_eol);
+                to_print_hex = to_print_hex.append("0A" + qba_eol);
+            }
+            else
+            {
+                // Data last character is an EOL
+                if(data_last_char == '\n')
+                {
+                    ignore_last_split_line = true;
+                    last_line_was_eol = true;
+                }
+                else
+                    last_line_was_eol = false;
+            }
+
+            // Ignore print this line
+            if(!ignore_last_split_line)
+            {
+                // Convert all non-basic printable ASCII characters to ? symbol (ASCII 63)
+                ushort ascii_num;
+                for(int i = 0; i < qstr_to_print_ascii.length(); i++)
+                {
+                    ascii_num = qstr_to_print_ascii[i].unicode();
+                    if((ascii_num < 32) || (ascii_num > 126))
+                    {
+                        // If actual char is not end of line ('\n')
+                        if(ascii_num != 10)
+                            qstr_to_print_ascii[i] = 63;
+                    }
+                }
+
+                // Write data line to ASCII and HEX textboxes
+                textBrowser0->insertPlainText(qstr_to_print_ascii);
+                textBrowser1->insertPlainText(to_print_hex);
+
+                // If Autoscroll is checked, scroll to bottom
+                QScrollBar *vertical_bar_ascii = textBrowser0->verticalScrollBar();
+                QScrollBar *vertical_bar_hex = textBrowser1->verticalScrollBar();
+                if(ui->checkBox_autoScroll->isChecked())
+                {
+                    vertical_bar_ascii->setValue(vertical_bar_ascii->maximum());
+                    vertical_bar_hex->setValue(vertical_bar_hex->maximum());
+                }
+                else
+                {
+                    // Return to previous cursor and scroll position
+                    textBrowser0->setTextCursor(original_cursor_pos_ascii);
+                    textBrowser1->setTextCursor(original_cursor_pos_hex);
+                    vertical_bar_ascii->setValue(original_scroll_pos_ascii);
+                    vertical_bar_hex->setValue(original_scroll_pos_hex);
                 }
             }
         }
