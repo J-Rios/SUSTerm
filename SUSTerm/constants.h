@@ -25,6 +25,7 @@ const int eol_default_value = 1; // 1 = New Line
 
 QStringList static comboBox_bauds_values =
 {
+    "300",
     "1200",
     "2400",
     "4800",
@@ -32,9 +33,15 @@ QStringList static comboBox_bauds_values =
     "19200",
     "38400",
     "57600",
-    "115200"
+    "74880",
+    "115200",
+    "230400",
+    "250000",
+    "500000",
+    "1000000",
+    "2000000"
 };
-const int bauds_default_value = 7; // 7 = 115200
+const int bauds_default_value = 9; // 9 = 115200
 
 const QString ABOUT_TEXT =
     "SUSTerm (Simple Universal Serial Terminal) is a free and open GNU-GPL software which is " \
