@@ -26,6 +26,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->comboBox_bauds->setValidator(new QIntValidator(0, 99999999, this));
 
     // TextBrowsers initialization
+    QFont font0("Monospace");
+    QFont font1("Monospace");
+    font0.setStyleHint(QFont::TypeWriter);
+    font1.setStyleHint(QFont::TypeWriter);
+    font1.setFixedPitch(true);
+    ui->textBrowser_serial_0->setFont(font0);
+    ui->textBrowser_serial_1->setFont(font1);
     ui->textBrowser_serial_0->clear();
     ui->textBrowser_serial_1->clear();
     ui->textBrowser_serial_1->hide();
@@ -351,12 +358,24 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
         // If there is no an EOL in the received data
         if(!received_has_eol/* && !timestamp_on*/)
         {
-            qDebug("Received without EOL");
             if(mode == ASCII)
             {
                 // Remove carriage return characters
                 QString qstr_ascii_data(serial_data);
                 qstr_ascii_data = qstr_ascii_data.remove(QChar('\r'));
+
+                // Convert all non-basic printable ASCII characters to ? symbol (ASCII 63)
+                ushort ascii_num;
+                for(int i = 0; i < qstr_ascii_data.length(); i++)
+                {
+                    ascii_num = qstr_ascii_data[i].unicode();
+                    if((ascii_num < 32) || (ascii_num > 126))
+                    {
+                        // If actual char is not end of line ('\n')
+                        if(ascii_num != 10)
+                            qstr_ascii_data[i] = 63;
+                    }
+                }
 
                 // Write the received data to ASCII and HEX textboxes
                 textBrowser0->insertPlainText(qstr_ascii_data);
@@ -366,11 +385,6 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 // Get the HEX data and format it to string
                 QByteArray serial_data_hex = serial_data.toHex();
                 serial_data_hex = serial_data_hex.toUpper();
-                qDebug("Hex to print: %s", serial_data_hex.data());
-
-                // If in this line we have yet 2 bytes printed, add a space before new data
-                //if(hex_line_num_chars % 2)
-                    //serial_data_hex.prepend(' ');
 
                 // If data to print is more than 2 bytes
                 if(serial_data_hex.length() > 2)
@@ -380,15 +394,6 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                         serial_data_hex.insert(i, " ");
                 }
                 serial_data_hex.append(' ');
-
-                //hex_line_num_chars = hex_line_num_chars + static_cast<uint32_t>(serial_data_hex.length());
-
-                // Add EOL to HEX data if last value is \n
-                /*if(data_last_char == '\n')
-                {
-                    serial_data_hex.append(qba_eol);
-                    hex_line_num_chars = 0;
-                }*/
 
                 // Write the received data to ASCII and HEX textboxes
                 textBrowser0->insertPlainText(serial_data_hex);
@@ -453,6 +458,19 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                     // Ignore print this line
                     if(!ignore_last_split_line)
                     {
+                        // Convert all non-basic printable ASCII characters to ? symbol (ASCII 63)
+                        ushort ascii_num;
+                        for(int i = 0; i < qstr_to_print_ascii.length(); i++)
+                        {
+                            ascii_num = qstr_to_print_ascii[i].unicode();
+                            if((ascii_num < 32) || (ascii_num > 126))
+                            {
+                                // If actual char is not end of line ('\n')
+                                if(ascii_num != 10)
+                                    qstr_to_print_ascii[i] = 63;
+                            }
+                        }
+
                         // Write data line to textbox
                         textBrowser0->insertPlainText(qstr_to_print_ascii);
 
@@ -499,17 +517,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
 
                     // Add time to data if it is not the first line
                     if(i != 0)
-                    {
                         to_print_hex = to_print_hex.prepend(qba_time);
-
-                        // If it is the last line
-                        /*if(i == num_lines-1)
-                        {
-                            // If this line doesnt end with a EOL, add a space
-                            if(!lines[i].contains('\n'))
-                                to_print_hex.append(' ');
-                        }*/
-                    }
                     else
                     {
                         // Add time to data if the last written line has an end of line
@@ -523,12 +531,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                     bool ignore_last_split_line = false;
                     if(i < num_lines-1)
                     {
-                        // If this line has any data after "[<TIME>] " add a white space before "0A\n"
-                        /*if(to_print_hex.size() > qba_time.size())
-                            to_print_hex = to_print_hex.append(" 0A" + qba_eol);
-                        else*/
-                            to_print_hex = to_print_hex.append("0A" + qba_eol);
-
+                        to_print_hex = to_print_hex.append("0A" + qba_eol);
                         hex_line_num_chars = 0;
                     }
                     else
@@ -615,6 +618,19 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
             QString qstr_ascii_data(serial_data);
             qstr_ascii_data = qstr_ascii_data.remove(QChar('\r'));
 
+            // Convert all non-basic printable ASCII characters to ? symbol (ASCII 63)
+            ushort ascii_num;
+            for(int i = 0; i < qstr_ascii_data.length(); i++)
+            {
+                ascii_num = qstr_ascii_data[i].unicode();
+                if((ascii_num < 32) || (ascii_num > 126))
+                {
+                    // If actual char is not end of line ('\n')
+                    if(ascii_num != 10)
+                        qstr_ascii_data[i] = 63;
+                }
+            }
+
             // Add EOL to HEX data if last value is \n
             if(data_last_char == '\n')
                 serial_data_hex.append(qba_eol);
@@ -677,14 +693,6 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 {
                     qstr_to_print_ascii = qstr_to_print_ascii.prepend(qba_time);
                     to_print_hex = to_print_hex.prepend(qba_time);
-
-                    // If it is the last line
-                    /*if(i == num_lines-1)
-                    {
-                        // If this line doesnt end with a EOL, add a space
-                        if(!lines[i].contains('\n'))
-                            to_print_hex.append(' ');
-                    }*/
                 }
                 else
                 {
@@ -703,12 +711,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 if(i < num_lines-1)
                 {
                     qstr_to_print_ascii = qstr_to_print_ascii.append(qba_eol);
-
-                    // If this line has any data after "[<TIME>] " add a white space before "0A\n"
-                    /*if(to_print_hex.size() > qba_time.size())
-                        to_print_hex = to_print_hex.append(" 0A" + qba_eol);
-                    else*/
-                        to_print_hex = to_print_hex.append("0A" + qba_eol);
+                    to_print_hex = to_print_hex.append("0A" + qba_eol);
                 }
                 else
                 {
@@ -725,6 +728,19 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 // Ignore print this line
                 if(!ignore_last_split_line)
                 {
+                    // Convert all non-basic printable ASCII characters to ? symbol (ASCII 63)
+                    ushort ascii_num;
+                    for(int i = 0; i < qstr_to_print_ascii.length(); i++)
+                    {
+                        ascii_num = qstr_to_print_ascii[i].unicode();
+                        if((ascii_num < 32) || (ascii_num > 126))
+                        {
+                            // If actual char is not end of line ('\n')
+                            if(ascii_num != 10)
+                                qstr_to_print_ascii[i] = 63;
+                        }
+                    }
+
                     // Write data line to ASCII and HEX textboxes
                     textBrowser0->insertPlainText(qstr_to_print_ascii);
                     textBrowser1->insertPlainText(to_print_hex);

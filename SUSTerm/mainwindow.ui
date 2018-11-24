@@ -267,6 +267,21 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>MS Shell Dlg 2</family>
+              <weight>50</weight>
+              <italic>false</italic>
+              <bold>false</bold>
+              <underline>false</underline>
+              <strikeout>false</strikeout>
+              <stylestrategy>PreferDefault</stylestrategy>
+              <kerning>false</kerning>
+             </font>
+            </property>
+            <property name="inputMethodHints">
+             <set>Qt::ImhMultiLine</set>
+            </property>
             <property name="horizontalScrollBarPolicy">
              <enum>Qt::ScrollBarAlwaysOn</enum>
             </property>
@@ -310,7 +325,14 @@ p, li { white-space: pre-wrap; }
             </property>
             <property name="font">
              <font>
-              <kerning>true</kerning>
+              <family>MS Shell Dlg 2</family>
+              <weight>50</weight>
+              <italic>false</italic>
+              <bold>false</bold>
+              <underline>false</underline>
+              <strikeout>false</strikeout>
+              <stylestrategy>PreferDefault</stylestrategy>
+              <kerning>false</kerning>
              </font>
             </property>
             <property name="toolTip">
@@ -342,6 +364,9 @@ p, li { white-space: pre-wrap; }
             </property>
             <property name="lineWrapMode">
              <enum>QTextEdit::NoWrap</enum>
+            </property>
+            <property name="acceptRichText">
+             <bool>true</bool>
             </property>
             <property name="textInteractionFlags">
              <set>Qt::TextSelectableByMouse</set>
