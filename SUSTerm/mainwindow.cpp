@@ -440,8 +440,8 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                         ascii_num = qstr_to_print_ascii[i].unicode();
                         if((ascii_num < 32) || (ascii_num > 126))
                         {
-                            // If actual char is not end of line ('\n')
-                            if(ascii_num != 10)
+                            // If actual char is not a tabulation ('\t') and not an end of line ('\n')
+                            if((ascii_num != 9) && (ascii_num != 10))
                                 qstr_to_print_ascii[i] = 63;
                         }
                     }
@@ -650,8 +650,8 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                     ascii_num = qstr_to_print_ascii[i].unicode();
                     if((ascii_num < 32) || (ascii_num > 126))
                     {
-                        // If actual char is not end of line ('\n')
-                        if(ascii_num != 10)
+                        // If actual char is not a tabulation ('\t') and not an end of line ('\n')
+                        if((ascii_num != 9) && (ascii_num != 10))
                             qstr_to_print_ascii[i] = 63;
                     }
                 }
