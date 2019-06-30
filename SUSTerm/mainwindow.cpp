@@ -688,10 +688,28 @@ void MainWindow::SerialSend(void)
 {
     // Check if to send data box is empty
     QString qstr_to_send = ui->lineEdit_toSend->text();
-    if((qstr_to_send.isNull()) || (qstr_to_send.isEmpty()))
+    if(qstr_to_send.isNull())
     {
         debug_print("Data to send box is null or empty");
         return;
+    }
+    if(qstr_to_send.isEmpty())
+    {
+        qstr_to_send = EOL_values[ui->comboBox_EOL->currentIndex()];
+
+        if(qstr_to_send != "")
+        {
+            // Send the data if the port is available
+            if(serial_port->isWritable())
+            {
+                // Convert QString to QByteArray to send a char* type
+                QByteArray qba_to_send = qstr_to_send.toUtf8();
+                serial_port->write(qba_to_send.data());
+            }
+
+            ui->lineEdit_toSend->setFocus();
+            return;
+        }
     }
 
     // Add to send data to history list
