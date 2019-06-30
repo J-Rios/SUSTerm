@@ -282,8 +282,14 @@
             <property name="inputMethodHints">
              <set>Qt::ImhMultiLine</set>
             </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOn</enum>
+            </property>
             <property name="horizontalScrollBarPolicy">
              <enum>Qt::ScrollBarAlwaysOn</enum>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustIgnored</enum>
             </property>
             <property name="lineWrapMode">
              <enum>QTextEdit::NoWrap</enum>
@@ -303,6 +309,12 @@ p, li { white-space: pre-wrap; }
             </property>
             <property name="textInteractionFlags">
              <set>Qt::TextSelectableByMouse</set>
+            </property>
+            <property name="placeholderText">
+             <string notr="true"/>
+            </property>
+            <property name="openLinks">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -356,6 +368,9 @@ p, li { white-space: pre-wrap; }
             <property name="midLineWidth">
              <number>0</number>
             </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOn</enum>
+            </property>
             <property name="horizontalScrollBarPolicy">
              <enum>Qt::ScrollBarAlwaysOn</enum>
             </property>
@@ -370,6 +385,9 @@ p, li { white-space: pre-wrap; }
             </property>
             <property name="textInteractionFlags">
              <set>Qt::TextSelectableByMouse</set>
+            </property>
+            <property name="placeholderText">
+             <string notr="true"/>
             </property>
            </widget>
           </item>

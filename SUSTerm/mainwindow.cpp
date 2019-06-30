@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             SLOT(CBoxBaudsChanged()));
     connect(ui->comboBox_EOL, SIGNAL(currentIndexChanged(const QString &)), this,
             SLOT(CBoxEOLChanged()));
+    connect(ui->checkBox_autoScroll, SIGNAL(clicked()), this, SLOT(CheckBoxAutoScrollToggled()));
     connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(MenuBarExitClick()));
     connect(ui->actionASCII_Terminal, SIGNAL(triggered()), this, SLOT(MenuBarTermAsciiClick()));
     connect(ui->actionHEX_Terminal, SIGNAL(triggered()), this, SLOT(MenuBarTermHexClick()));
@@ -62,25 +63,46 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(MenuBarAboutClick()));
 
     // Connect TextBrowsers Scrolls (scroll one of them move the other)
-    static int current_slider_pos = 0;
-    QScrollBar* scroll_ascii = ui->textBrowser_serial_0->verticalScrollBar();
-    QScrollBar* scroll_hex = ui->textBrowser_serial_1->verticalScrollBar();
-    connect(scroll_ascii, &QAbstractSlider::valueChanged,
-            [=](int scroll_ascii_slider_pos)
+    static int current_slider_pos_v = 0;
+    static int current_slider_pos_h = 0;
+    QScrollBar* scroll_ascii_v = ui->textBrowser_serial_0->verticalScrollBar();
+    QScrollBar* scroll_hex_v = ui->textBrowser_serial_1->verticalScrollBar();
+    QScrollBar* scroll_ascii_h = ui->textBrowser_serial_0->horizontalScrollBar();
+    QScrollBar* scroll_hex_h = ui->textBrowser_serial_1->horizontalScrollBar();
+    connect(scroll_ascii_v, &QAbstractSlider::valueChanged,
+            [=](int scroll_ascii_slider_pos_v)
             {
-                if(scroll_ascii_slider_pos != current_slider_pos)
+                if(scroll_ascii_slider_pos_v != current_slider_pos_v)
                 {
-                    scroll_hex->setValue(scroll_ascii_slider_pos);
-                    current_slider_pos = scroll_ascii_slider_pos;
+                    scroll_hex_v->setValue(scroll_ascii_slider_pos_v);
+                    current_slider_pos_v = scroll_ascii_slider_pos_v;
                 }
             });
-    connect(scroll_hex, &QAbstractSlider::valueChanged,
-            [=](int scroll_hex_slider_pos)
+    connect(scroll_hex_v, &QAbstractSlider::valueChanged,
+            [=](int scroll_hex_slider_pos_v)
             {
-                if(scroll_hex_slider_pos != current_slider_pos)
+                if(scroll_hex_slider_pos_v != current_slider_pos_v)
                 {
-                    scroll_ascii->setValue(scroll_hex_slider_pos);
-                    current_slider_pos = scroll_hex_slider_pos;
+                    scroll_ascii_v->setValue(scroll_hex_slider_pos_v);
+                    current_slider_pos_v = scroll_hex_slider_pos_v;
+                }
+            });
+    connect(scroll_ascii_h, &QAbstractSlider::valueChanged,
+            [=](int scroll_ascii_slider_pos_h)
+            {
+                if(scroll_ascii_slider_pos_h != current_slider_pos_h)
+                {
+                    scroll_hex_h->setValue(scroll_ascii_slider_pos_h);
+                    current_slider_pos_h = scroll_ascii_slider_pos_h;
+                }
+            });
+    connect(scroll_hex_h, &QAbstractSlider::valueChanged,
+            [=](int scroll_hex_slider_pos_h)
+            {
+                if(scroll_hex_slider_pos_h != current_slider_pos_h)
+                {
+                    scroll_ascii_h->setValue(scroll_hex_slider_pos_h);
+                    current_slider_pos_h = scroll_hex_slider_pos_h;
                 }
             });
 
@@ -276,7 +298,7 @@ void MainWindow::ClosePort(void)
 
 /**************************************************************************************************/
 
-/* Bauds and Send EOL bytes change */
+/* Bauds, Send EOL bytes and Auto-Scroll changes */
 
 // ComboBox Bauds change event handler
 void MainWindow::CBoxBaudsChanged(void)
@@ -298,6 +320,26 @@ void MainWindow::CBoxEOLChanged(void)
     debug_print("Send EOL changed.");
 
     ui->lineEdit_toSend->setFocus();
+}
+
+// CheckBox AutoScroll toggled event handler
+void MainWindow::CheckBoxAutoScrollToggled(void)
+{
+    debug_print("Auto-Scroll CheckBox changed.");
+
+    // If user check autoscroll, move scroll bars to default positions
+    if(ui->checkBox_autoScroll->isChecked())
+    {
+        QScrollBar *vertical_bar_ascii = ui->textBrowser_serial_0->verticalScrollBar();
+        QScrollBar *horizontal_bar_ascii = ui->textBrowser_serial_0->horizontalScrollBar();
+        QScrollBar *vertical_bar_hex = ui->textBrowser_serial_1->verticalScrollBar();
+        QScrollBar *horizontal_bar_hex = ui->textBrowser_serial_1->horizontalScrollBar();
+
+        vertical_bar_ascii->setValue(vertical_bar_ascii->maximum());
+        vertical_bar_hex->setValue(vertical_bar_hex->maximum());
+        horizontal_bar_ascii->setValue(horizontal_bar_ascii->minimum());
+        horizontal_bar_hex->setValue(horizontal_bar_hex->minimum());
+    }
 }
 
 /**************************************************************************************************/
@@ -338,15 +380,6 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
     // If terminal mode is ASCII or HEX (Single TextBrowser)
     if((mode == ASCII) || (mode == HEX))
     {
-        // Get original cursor and scroll position
-        QTextCursor original_cursor_pos = textBrowser0->textCursor();
-        int original_scroll_pos = textBrowser0->verticalScrollBar()->value();
-
-        // Set textbox cursor to bottom
-        QTextCursor new_cursor = original_cursor_pos;
-        new_cursor.movePosition(QTextCursor::End);
-        textBrowser0->setTextCursor(new_cursor);
-
         // Get the received data and split it by lines
         QByteArray serial_data = serial_port->readAll();
         QList<QByteArray> lines = serial_data.split('\n');
@@ -413,18 +446,30 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                         }
                     }
 
+                    // Get original cursor and scroll position
+                    QTextCursor original_cursor_pos = textBrowser0->textCursor();
+                    QScrollBar *vertical_bar = textBrowser0->verticalScrollBar();
+                    QScrollBar *horizontal_bar = textBrowser0->horizontalScrollBar();
+                    int original_scroll_pos_v = vertical_bar->value();
+                    int original_scroll_pos_h = horizontal_bar->value();
+
+                    // Set textbox cursor to bottom
+                    QTextCursor new_cursor = original_cursor_pos;
+                    new_cursor.movePosition(QTextCursor::End);
+                    textBrowser0->setTextCursor(new_cursor);
+
                     // Write data line to textbox
                     textBrowser0->insertPlainText(qstr_to_print_ascii);
 
                     // If Autoscroll is checked, scroll to bottom
-                    QScrollBar *vertical_bar = textBrowser0->verticalScrollBar();
                     if(ui->checkBox_autoScroll->isChecked())
                         vertical_bar->setValue(vertical_bar->maximum());
                     else
                     {
-                        // Return to previous cursor and scroll position
+                        // Return to previous cursor and scrolls position
                         textBrowser0->setTextCursor(original_cursor_pos);
-                        vertical_bar->setValue(original_scroll_pos);
+                        vertical_bar->setValue(original_scroll_pos_v);
+                        horizontal_bar->setValue(original_scroll_pos_h);
                     }
                 }
             }
@@ -491,18 +536,30 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 // Ignore print this line
                 if(!ignore_last_split_line)
                 {
+                    // Get original cursor and scroll position
+                    QTextCursor original_cursor_pos = textBrowser0->textCursor();
+                    QScrollBar *vertical_bar = textBrowser0->verticalScrollBar();
+                    QScrollBar *horizontal_bar = textBrowser0->horizontalScrollBar();
+                    int original_scroll_pos_v = vertical_bar->value();
+                    int original_scroll_pos_h = horizontal_bar->value();
+
+                    // Set textbox cursor to bottom
+                    QTextCursor new_cursor = original_cursor_pos;
+                    new_cursor.movePosition(QTextCursor::End);
+                    textBrowser0->setTextCursor(new_cursor);
+
                     // Write data line to textbox
                     textBrowser0->insertPlainText(to_print_hex);
 
                     // If Autoscroll is checked, scroll to bottom
-                    QScrollBar *vertical_bar = textBrowser0->verticalScrollBar();
                     if(ui->checkBox_autoScroll->isChecked())
                         vertical_bar->setValue(vertical_bar->maximum());
                     else
                     {
                         // Return to previous cursor and scroll position
                         textBrowser0->setTextCursor(original_cursor_pos);
-                        vertical_bar->setValue(original_scroll_pos);
+                        vertical_bar->setValue(original_scroll_pos_v);
+                        horizontal_bar->setValue(original_scroll_pos_h);
                     }
                 }
             }
@@ -510,20 +567,6 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
     }
     else if (mode == ASCII_HEX)
     {
-        // Get original cursor and scroll position
-        QTextCursor original_cursor_pos_ascii = textBrowser0->textCursor();
-        QTextCursor original_cursor_pos_hex = textBrowser1->textCursor();
-        int original_scroll_pos_ascii = textBrowser0->verticalScrollBar()->value();
-        int original_scroll_pos_hex = textBrowser1->verticalScrollBar()->value();
-
-        // Set textbox cursor to bottom
-        QTextCursor new_cursor_ascii = original_cursor_pos_ascii;
-        QTextCursor new_cursor_hex = original_cursor_pos_hex;
-        new_cursor_ascii.movePosition(QTextCursor::End);
-        new_cursor_hex.movePosition(QTextCursor::End);
-        textBrowser0->setTextCursor(new_cursor_ascii);
-        textBrowser1->setTextCursor(new_cursor_hex);
-
         // Get the received data and split it by lines
         QByteArray serial_data = serial_port->readAll();
         QList<QByteArray> lines = serial_data.split('\n');
@@ -613,25 +656,47 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                     }
                 }
 
+                // Get original cursor and scroll position
+                QTextCursor original_cursor_pos_ascii = textBrowser0->textCursor();
+                QTextCursor original_cursor_pos_hex = textBrowser1->textCursor();
+                QScrollBar *vertical_bar_ascii = textBrowser0->verticalScrollBar();
+                QScrollBar *horizontal_bar_ascii = textBrowser0->horizontalScrollBar();
+                QScrollBar *vertical_bar_hex = textBrowser1->verticalScrollBar();
+                QScrollBar *horizontal_bar_hex = textBrowser1->horizontalScrollBar();
+                int original_scroll_pos_ascii_v = vertical_bar_ascii->value();
+                int original_scroll_pos_ascii_h = horizontal_bar_ascii->value();
+                int original_scroll_pos_hex_v = vertical_bar_hex->value();
+                int original_scroll_pos_hex_h = horizontal_bar_hex->value();
+
+                // Set textbox cursor to bottom
+                QTextCursor new_cursor_ascii = original_cursor_pos_ascii;
+                QTextCursor new_cursor_hex = original_cursor_pos_hex;
+                new_cursor_ascii.movePosition(QTextCursor::End);
+                new_cursor_hex.movePosition(QTextCursor::End);
+                textBrowser0->setTextCursor(new_cursor_ascii);
+                textBrowser1->setTextCursor(new_cursor_hex);
+
                 // Write data line to ASCII and HEX textboxes
                 textBrowser0->insertPlainText(qstr_to_print_ascii);
                 textBrowser1->insertPlainText(to_print_hex);
 
                 // If Autoscroll is checked, scroll to bottom
-                QScrollBar *vertical_bar_ascii = textBrowser0->verticalScrollBar();
-                QScrollBar *vertical_bar_hex = textBrowser1->verticalScrollBar();
                 if(ui->checkBox_autoScroll->isChecked())
                 {
                     vertical_bar_ascii->setValue(vertical_bar_ascii->maximum());
                     vertical_bar_hex->setValue(vertical_bar_hex->maximum());
+                    horizontal_bar_ascii->setValue(original_scroll_pos_ascii_h);
+                    horizontal_bar_hex->setValue(original_scroll_pos_hex_h);
                 }
                 else
                 {
                     // Return to previous cursor and scroll position
                     textBrowser0->setTextCursor(original_cursor_pos_ascii);
                     textBrowser1->setTextCursor(original_cursor_pos_hex);
-                    vertical_bar_ascii->setValue(original_scroll_pos_ascii);
-                    vertical_bar_hex->setValue(original_scroll_pos_hex);
+                    vertical_bar_ascii->setValue(original_scroll_pos_ascii_v);
+                    vertical_bar_hex->setValue(original_scroll_pos_hex_v);
+                    horizontal_bar_ascii->setValue(original_scroll_pos_ascii_h);
+                    horizontal_bar_hex->setValue(original_scroll_pos_hex_h);
                 }
             }
         }
