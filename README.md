@@ -2,7 +2,7 @@
 
 ![SUSTerm GUI](https://github.com/J-Rios/SUSTerm/raw/master/SUSTerm/res/SUSTerm_GUI.png)
 
-A Simple Universal Serial Terminal) is a free and open GNU-GPL Serial Terminal developed using QT5 which is focused in be minimalist and efficiently fast and easy to use.
+SUSTerm (Simple Universal Serial Terminal) is a free software and GNU-GPL licensed Serial terminal developed using QT5, and focused in be minimalist and efficiently fast and easy to use, while contains some more advanced features that can be enabled.
 
 ### Characteristics:
   * Minimalist, robust, simple and fast to use.
@@ -13,11 +13,11 @@ A Simple Universal Serial Terminal) is a free and open GNU-GPL Serial Terminal d
   * Sent commands history, navigate and recover previous sent commands with arrow keys.
   * Can show Timestamp of received data (on each \n).
   * Can show received data in ASCII, HEX or Both format at same time.
-  * Open Source and Free.
+  * Open Source and Free software.
 
 ### Install Instructions:
 #### Windows:
-  * Download [last version](https://github.com/J-Rios/SUSTerm/releases/download/v1.4/Windows_SUSTerm_v140.zip).
+  * Download [last version](https://github.com/J-Rios/SUSTerm/releases/download/v1.5/Windows_SUSTerm_v150.zip).
   * Unzip it and place in "C:\Program File (x86)"
   * Create a desktop shortcut of "C:\Program File (x86)\SUSTerm\SUSTerm.exe"
 
