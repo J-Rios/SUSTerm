@@ -43,6 +43,7 @@ class MainWindow : public QMainWindow
         bool timestamp_on;
         bool timestamp_ms;
         terminal_modes terminal_mode;
+        int current_slider_pos_v, current_slider_pos_h;
 
         void SerialPortsChecks_timer_init(void);
         void OpenPort(void);

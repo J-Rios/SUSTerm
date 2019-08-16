@@ -63,8 +63,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(MenuBarAboutClick()));
 
     // Connect TextBrowsers Scrolls (scroll one of them move the other)
-    static int current_slider_pos_v = 0;
-    static int current_slider_pos_h = 0;
+    current_slider_pos_v = 0;
+    current_slider_pos_h = 0;
     QScrollBar* scroll_ascii_v = ui->textBrowser_serial_0->verticalScrollBar();
     QScrollBar* scroll_hex_v = ui->textBrowser_serial_1->verticalScrollBar();
     QScrollBar* scroll_ascii_h = ui->textBrowser_serial_0->horizontalScrollBar();
@@ -74,18 +74,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             {
                 if(scroll_ascii_slider_pos_v != current_slider_pos_v)
                 {
-                    // Disable autoscroll checkbox if move out of bottom
-                    if(scroll_ascii_slider_pos_v < current_slider_pos_v)
+                    // Handle autoscroll enable/disable just for more than 100 lines
+                    if(scroll_ascii_slider_pos_v > 100)
                     {
-                        if(ui->checkBox_autoScroll->isChecked())
-                            ui->checkBox_autoScroll->setChecked(false);
-                    }
+                        // Disable autoscroll checkbox if move out of bottom
+                        if(scroll_ascii_slider_pos_v < current_slider_pos_v)
+                        {
+                            if(ui->checkBox_autoScroll->isChecked())
+                                ui->checkBox_autoScroll->setChecked(false);
+                        }
 
-                    // Enable autoscroll checkbox if move to bottom
-                    if(scroll_ascii_slider_pos_v >= scroll_ascii_v->maximum())
-                    {
-                        if(!ui->checkBox_autoScroll->isChecked())
-                            ui->checkBox_autoScroll->setChecked(true);
+                        // Enable autoscroll checkbox if move to bottom
+                        if(scroll_ascii_slider_pos_v >= scroll_ascii_v->maximum())
+                        {
+                            if(!ui->checkBox_autoScroll->isChecked())
+                                ui->checkBox_autoScroll->setChecked(true);
+                        }
                     }
 
                     scroll_hex_v->setValue(scroll_ascii_slider_pos_v);
@@ -340,16 +344,6 @@ void MainWindow::CBoxEOLChanged(void)
 void MainWindow::CheckBoxAutoScrollToggled(void)
 {
     debug_print("Auto-Scroll CheckBox changed.");
-
-    QScrollBar *vertical_bar_ascii = ui->textBrowser_serial_0->verticalScrollBar();
-    QScrollBar *horizontal_bar_ascii = ui->textBrowser_serial_0->horizontalScrollBar();
-    QScrollBar *vertical_bar_hex = ui->textBrowser_serial_1->verticalScrollBar();
-    QScrollBar *horizontal_bar_hex = ui->textBrowser_serial_1->horizontalScrollBar();
-
-    vertical_bar_ascii->setValue(vertical_bar_ascii->maximum());
-    vertical_bar_hex->setValue(vertical_bar_hex->maximum());
-    horizontal_bar_ascii->setValue(horizontal_bar_ascii->minimum());
-    horizontal_bar_hex->setValue(horizontal_bar_hex->minimum());
 }
 
 /**************************************************************************************************/
