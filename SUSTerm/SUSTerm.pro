@@ -7,6 +7,7 @@
 QT       += core gui
 QT       += serialport
 
+RC_ICONS = res/SUSTerm_ICO.png
 RC_FILE = resourcecollection.rc
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

@@ -74,6 +74,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             {
                 if(scroll_ascii_slider_pos_v != current_slider_pos_v)
                 {
+                    // Disable autoscroll checkbox if move out of bottom
+                    if(scroll_ascii_slider_pos_v < current_slider_pos_v)
+                    {
+                        if(ui->checkBox_autoScroll->isChecked())
+                            ui->checkBox_autoScroll->setChecked(false);
+                    }
+
+                    // Enable autoscroll checkbox if move to bottom
+                    if(scroll_ascii_slider_pos_v >= scroll_ascii_v->maximum())
+                    {
+                        if(!ui->checkBox_autoScroll->isChecked())
+                            ui->checkBox_autoScroll->setChecked(true);
+                    }
+
                     scroll_hex_v->setValue(scroll_ascii_slider_pos_v);
                     current_slider_pos_v = scroll_ascii_slider_pos_v;
                 }
@@ -327,19 +341,15 @@ void MainWindow::CheckBoxAutoScrollToggled(void)
 {
     debug_print("Auto-Scroll CheckBox changed.");
 
-    // If user check autoscroll, move scroll bars to default positions
-    if(ui->checkBox_autoScroll->isChecked())
-    {
-        QScrollBar *vertical_bar_ascii = ui->textBrowser_serial_0->verticalScrollBar();
-        QScrollBar *horizontal_bar_ascii = ui->textBrowser_serial_0->horizontalScrollBar();
-        QScrollBar *vertical_bar_hex = ui->textBrowser_serial_1->verticalScrollBar();
-        QScrollBar *horizontal_bar_hex = ui->textBrowser_serial_1->horizontalScrollBar();
+    QScrollBar *vertical_bar_ascii = ui->textBrowser_serial_0->verticalScrollBar();
+    QScrollBar *horizontal_bar_ascii = ui->textBrowser_serial_0->horizontalScrollBar();
+    QScrollBar *vertical_bar_hex = ui->textBrowser_serial_1->verticalScrollBar();
+    QScrollBar *horizontal_bar_hex = ui->textBrowser_serial_1->horizontalScrollBar();
 
-        vertical_bar_ascii->setValue(vertical_bar_ascii->maximum());
-        vertical_bar_hex->setValue(vertical_bar_hex->maximum());
-        horizontal_bar_ascii->setValue(horizontal_bar_ascii->minimum());
-        horizontal_bar_hex->setValue(horizontal_bar_hex->minimum());
-    }
+    vertical_bar_ascii->setValue(vertical_bar_ascii->maximum());
+    vertical_bar_hex->setValue(vertical_bar_hex->maximum());
+    horizontal_bar_ascii->setValue(horizontal_bar_ascii->minimum());
+    horizontal_bar_hex->setValue(horizontal_bar_hex->minimum());
 }
 
 /**************************************************************************************************/
