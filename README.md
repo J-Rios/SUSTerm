@@ -17,7 +17,7 @@ SUSTerm (Simple Universal Serial Terminal) is a free software and GNU-GPL licens
 
 ### Install Instructions:
 #### Windows:
-  * Download [last version](https://github.com/J-Rios/SUSTerm/releases/download/v1.5/Windows_SUSTerm_v150.zip).
+  * Download [last version](https://github.com/J-Rios/SUSTerm/releases/download/v1.6/Windows_SUSTerm_v160.zip).
   * Unzip it and place in "C:\Program File (x86)"
   * Create a desktop shortcut of "C:\Program File (x86)\SUSTerm\SUSTerm.exe"
 
@@ -25,13 +25,13 @@ SUSTerm (Simple Universal Serial Terminal) is a free software and GNU-GPL licens
   * Download last version:
   ```
   $ cd ~
-  $ wget https://github.com/J-Rios/SUSTerm/releases/download/v1.4/Linux_SUSTerm_v140.zip
+  $ wget https://github.com/J-Rios/SUSTerm/releases/download/v1.6/Linux_SUSTerm_v160.zip
   ```
   
   * Unzip it, give execution permission and place it to user binaries apps dir:
   ```
-  $ unzip Linux_SUSTerm_v140.zip
-  $ cd Linux_SUSTerm_v140
+  $ unzip Linux_SUSTerm_v160.zip
+  $ cd Linux_SUSTerm_v160
   $ sudo chmod +x ./install
   $ sudo ./install
   ```
@@ -39,7 +39,7 @@ SUSTerm (Simple Universal Serial Terminal) is a free software and GNU-GPL licens
   * Remove unnecessary used files:
   ```
   $ cd ~
-  $ rm -rf Linux_SUSTerm_v140*
+  $ rm -rf Linux_SUSTerm_v160*
   ```
   
   * Add actual user to dialout group to allow open serial ports without been root and reboot system to apply:
@@ -91,7 +91,6 @@ mkdir qtserialport-build
 git clone git://code.qt.io/qt/qtserialport.git
 cd qtserialport
 git checkout v5.11.2
-git branch -a
 cd ../qtserialport-build
 qmake ../qtserialport/qtserialport.pro
 make
