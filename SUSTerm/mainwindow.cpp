@@ -781,8 +781,14 @@ void MainWindow::SerialSend(void)
         }
     }
 
-    // Add to send data to history list
-    qstrl_send_history.prepend(qstr_to_send);
+    // Add to send data to history list if it is not there yet
+    if(!qstrl_send_history.isEmpty())
+    {
+        if(qstr_to_send != qstrl_send_history[0])
+            qstrl_send_history.prepend(qstr_to_send);
+    }
+    else
+        qstrl_send_history.prepend(qstr_to_send);
     send_history_i = -1;
 
     // Append selected end character to data to be send
