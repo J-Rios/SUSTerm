@@ -357,6 +357,7 @@ void MainWindow::ButtonClearPressed(void)
     ui->textBrowser_serial_0->clear();
     ui->textBrowser_serial_1->clear();
     ui->lineEdit_toSend->setFocus();
+    ui->checkBox_autoScroll->setChecked(true);
 }
 
 // Serial received data from port
@@ -755,11 +756,13 @@ void MainWindow::ButtonSendPressed(void)
 // Serial send data from lineEdit box
 void MainWindow::SerialSend(void)
 {
+    QScrollBar* vertical_bar = ui->textBrowser_serial_0->verticalScrollBar();
+
     // Check if to send data box is empty
     QString qstr_to_send = ui->lineEdit_toSend->text();
     if(qstr_to_send.isNull())
     {
-        debug_print("Data to send box is null or empty");
+        debug_print("Data to send box is null.");
         return;
     }
     if(qstr_to_send.isEmpty())
@@ -777,6 +780,11 @@ void MainWindow::SerialSend(void)
             }
 
             ui->lineEdit_toSend->setFocus();
+
+            // Check autoscroll and go to bottom
+            ui->checkBox_autoScroll->setChecked(true);
+            vertical_bar->setValue(vertical_bar->maximum());
+
             return;
         }
     }
@@ -801,6 +809,10 @@ void MainWindow::SerialSend(void)
         QByteArray qba_to_send = qstr_to_send.toUtf8();
         serial_port->write(qba_to_send.data());
     }
+
+    // Check autoscroll and go to bottom
+    ui->checkBox_autoScroll->setChecked(true);
+    vertical_bar->setValue(vertical_bar->maximum());
 
     ui->lineEdit_toSend->setFocus();
 }
