@@ -468,7 +468,10 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
 
                     // If Autoscroll is checked, scroll to bottom
                     if(ui->checkBox_autoScroll->isChecked())
+                    {
+                        vertical_bar->triggerAction(QAbstractSlider::SliderToMaximum);
                         vertical_bar->setValue(vertical_bar->maximum());
+                    }
                     else
                     {
                         // Return to previous cursor and scrolls position
@@ -558,7 +561,10 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
 
                     // If Autoscroll is checked, scroll to bottom
                     if(ui->checkBox_autoScroll->isChecked())
+                    {
+                        vertical_bar->triggerAction(QAbstractSlider::SliderToMaximum);
                         vertical_bar->setValue(vertical_bar->maximum());
+                    }
                     else
                     {
                         // Return to previous cursor and scroll position
@@ -688,6 +694,8 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                 // If Autoscroll is checked, scroll to bottom
                 if(ui->checkBox_autoScroll->isChecked())
                 {
+                    vertical_bar_ascii->triggerAction(QAbstractSlider::SliderToMaximum);
+                    vertical_bar_hex->triggerAction(QAbstractSlider::SliderToMaximum);
                     vertical_bar_ascii->setValue(vertical_bar_ascii->maximum());
                     vertical_bar_hex->setValue(vertical_bar_hex->maximum());
                     horizontal_bar_ascii->setValue(original_scroll_pos_ascii_h);
@@ -783,6 +791,7 @@ void MainWindow::SerialSend(void)
 
             // Check autoscroll and go to bottom
             ui->checkBox_autoScroll->setChecked(true);
+            vertical_bar->triggerAction(QAbstractSlider::SliderToMaximum);
             vertical_bar->setValue(vertical_bar->maximum());
 
             return;
@@ -812,6 +821,7 @@ void MainWindow::SerialSend(void)
 
     // Check autoscroll and go to bottom
     ui->checkBox_autoScroll->setChecked(true);
+    vertical_bar->triggerAction(QAbstractSlider::SliderToMaximum);
     vertical_bar->setValue(vertical_bar->maximum());
 
     ui->lineEdit_toSend->setFocus();
@@ -846,7 +856,7 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
         }
 
         // If Key pressed is Down arrow, the focus is set to send box and history is not empty
-        if(keyEvent->key() == Qt::Key_Down)
+        else if(keyEvent->key() == Qt::Key_Down)
         {
             if(ui->lineEdit_toSend->hasFocus())
             {
@@ -860,6 +870,33 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
                     else
                         ui->lineEdit_toSend->clear();
                 }
+            }
+        }
+
+        // Check to set focus in send data box
+        else
+        {
+            // Ignore if focus is currently in
+            if(ui->lineEdit_toSend->hasFocus())
+                return QObject::eventFilter(target, event);
+
+            // Ignore if send box is not enabled
+            if(!ui->lineEdit_toSend->isEnabled())
+                return QObject::eventFilter(target, event);
+
+            // Ignore if it is a modifier key event or a non-shift modifier key cobination
+            // press (i.e. CTRL+KEY)
+            if((!keyEvent->modifiers()) || (keyEvent->modifiers() & Qt::ShiftModifier))
+            {
+                // Add key text if it is not the ENTER key
+                if((keyEvent->key() != Qt::Key_Enter) && (keyEvent->key() != Qt::Key_Return))
+                {
+                    QString text = ui->lineEdit_toSend->text() + keyEvent->text();
+                    ui->lineEdit_toSend->setText(text);
+                }
+
+                // Set focus
+                ui->lineEdit_toSend->setFocus();
             }
         }
     }
@@ -946,7 +983,10 @@ void MainWindow::MenuBarTermBothAsciiHexClick(void)
     int scroll_pos = ui->textBrowser_serial_0->verticalScrollBar()->value();
     QScrollBar *vertical_bar = ui->textBrowser_serial_1->verticalScrollBar();
     if(ui->checkBox_autoScroll->isChecked())
+    {
+        vertical_bar->triggerAction(QAbstractSlider::SliderToMaximum);
         vertical_bar->setValue(vertical_bar->maximum());
+    }
     else
         vertical_bar->setValue(scroll_pos);
     ui->textBrowser_serial_1->show();

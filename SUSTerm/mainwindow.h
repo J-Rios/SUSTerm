@@ -13,6 +13,7 @@
 #include <QTimer>
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include <QKeyEvent>
 
 #include "ui_mainwindow.h"
 #include "constants.h"
