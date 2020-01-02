@@ -17,7 +17,7 @@ SUSTerm (Simple Universal Serial Terminal) is a free software and GNU-GPL licens
 
 ### Install Instructions:
 #### Windows:
-  * Download [last version](https://github.com/J-Rios/SUSTerm/releases/download/v1.7/Windows_SUSTerm_v170.zip).
+  * Download [last version](https://github.com/J-Rios/SUSTerm/releases/download/v1.7.0/Windows_SUSTerm_v170.zip).
   * Unzip it and place in "C:\Program File (x86)"
   * Create a desktop shortcut of "C:\Program File (x86)\SUSTerm\SUSTerm.exe"
 
@@ -25,7 +25,7 @@ SUSTerm (Simple Universal Serial Terminal) is a free software and GNU-GPL licens
   * Download last version:
   ```
   $ cd ~
-  $ wget https://github.com/J-Rios/SUSTerm/releases/download/v1.7/Linux_SUSTerm_v170.zip
+  $ wget https://github.com/J-Rios/SUSTerm/releases/download/v1.7.0/Linux_SUSTerm_v170.zip
   ```
   
   * Unzip it, give execution permission and place it to user binaries apps dir:
