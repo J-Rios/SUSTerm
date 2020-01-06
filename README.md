@@ -28,10 +28,10 @@ SUSTerm (Simple Universal Serial Terminal) is a free software and GNU-GPL licens
   $ wget https://github.com/J-Rios/SUSTerm/releases/download/v1.7.0/Linux_SUSTerm_v170.zip
   ```
   
-  * Unzip it, give execution permission and place it to user binaries apps dir:
+  * Unzip it, give execution permission to install script and run it:
   ```
-  $ unzip Linux_SUSTerm_v160.zip
-  $ cd Linux_SUSTerm_v160
+  $ unzip Linux_SUSTerm_v170.zip
+  $ cd Linux_SUSTerm_v170
   $ sudo chmod +x ./install
   $ sudo ./install
   ```
@@ -39,7 +39,7 @@ SUSTerm (Simple Universal Serial Terminal) is a free software and GNU-GPL licens
   * Remove unnecessary used files:
   ```
   $ cd ~
-  $ rm -rf Linux_SUSTerm_v160*
+  $ rm -rf Linux_SUSTerm_v170*
   ```
   
   * Add actual user to dialout group to allow open serial ports without been root and reboot system to apply:
