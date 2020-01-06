@@ -1,9 +1,28 @@
 #!/bin/sh
 
-chmod +x SUSTerm
+# Check for root privileges
+if [ "$(id -u)" != "0" ]; then
+    echo "This script must be executed with administration privileges."
+    echo ""
+    exit 1
+fi
+
+# Create expected directories if them doesn't exists
 mkdir -p /usr/bin
 mkdir -p /usr/share/applications/
 mkdir -p /usr/share/icons/hicolor/256x256/apps
-cp -a SUSTerm.desktop /usr/share/applications/SUSTerm.desktop
-cp -a SUSTerm.png /usr/share/icons/hicolor/256x256/apps/SUSTerm.png
-cp -a SUSTerm /usr/bin/
+
+# Give execution permission to APP binary
+chmod +x ./SUSTerm
+
+# Change permissions and owner of the icon
+chmod 644 ./SUSTerm.png
+chown -R root:root ./SUSTerm.png
+
+# Copy each file to the expected locations
+cp -a ./SUSTerm /usr/bin/
+cp -a ./SUSTerm.desktop /usr/share/applications/SUSTerm.desktop
+cp -a ./SUSTerm.png /usr/share/icons/hicolor/256x256/apps/SUSTerm.png
+
+# Renew icon cache to apply it
+gtk-update-icon-cache /usr/share/icons/hicolor
