@@ -2,7 +2,7 @@
 
 ![SUSTerm GUI](https://github.com/J-Rios/SUSTerm/raw/master/SUSTerm/res/SUSTerm_GUI.png)
 
-SUSTerm (Simple Universal Serial Terminal) is a free software and GNU-GPL licensed Serial terminal developed using QT5, and focused in be minimalist and efficiently fast and easy to use, while contains some more advanced features that can be enabled.
+SUSTerm (Simple Universal Serial Terminal) is a free software and GNU-GPL licensed Serial terminal developed using QT6, and focused in be minimalist and efficiently fast and easy to use, while contains some more advanced features that can be enabled.
 
 ### Characteristics:
   * Minimalist, robust, simple and fast to use.
@@ -76,28 +76,28 @@ Do you like this software? Buy me a coffee:
 
 To build this QT project in Linux, remeber that you need to install QSerialPort module.
 
-- Install QT:
+- Install requirements:
 ```
-sudo apt-get -y install build-essential
-sudo apt-get -y install qtcreator
-sudo apt-get -y install qt5-default
-sudo apt-get -y install qtbase5-private-dev
+sudo apt-get install -y build-essential
+sudo apt-get install -y cmake
+sudo apt-get install -y libudev-dev
+sudo apt-get install -y libopengl0
+sudo apt-get install -y libgl1-mesa-dev
 ```
 
 - Get QSerialPort module and install it:
 ```
 cd ~
-mkdir qtserialport-build
 git clone git://code.qt.io/qt/qtserialport.git
 cd qtserialport
-git checkout v5.11.2
-cd ../qtserialport-build
-qmake ../qtserialport/qtserialport.pro
+git checkout v6.2.2
+export CMAKE_PREFIX_PATH=/home/$USER/Qt/6.2.2/gcc_64/lib/cmake/
+cmake .
 make
 sudo make install
 ```
 
 ### Notes:
-- QT version is 5.11.2.
-- The project was written in QtCreator 4.7.1.
+- QT version is 6.2.2.
+- The project was written in QtCreator 6.0.0.
 - The implementation uses QSerialPort class to manage Serial ports.
