@@ -447,7 +447,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                         {
                             // If actual char is not a tabulation ('\t') and not an end of line ('\n')
                             if((ascii_num != 9) && (ascii_num != 10))
-                                qstr_to_print_ascii[i] = 63;
+                                qstr_to_print_ascii[i] = (QChar)(63);
                         }
                     }
 
@@ -663,7 +663,7 @@ void MainWindow::PrintReceivedData(QTextBrowser* textBrowser0, QTextBrowser *tex
                     {
                         // If actual char is not a tabulation ('\t') and not an end of line ('\n')
                         if((ascii_num != 9) && (ascii_num != 10))
-                            qstr_to_print_ascii[i] = 63;
+                            qstr_to_print_ascii[i] = QChar(63);
                     }
                 }
 
