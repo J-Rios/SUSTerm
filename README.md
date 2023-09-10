@@ -22,6 +22,12 @@ SUSTerm (Simple Universal Serial Terminal) is a free software and GNU-GPL licens
   * Create a desktop shortcut of "C:\Program File (x86)\SUSTerm\SUSTerm.exe"
 
 #### Linux:
+  * Install required tools:
+  ```
+  $ sudo apt update
+  $ sudo apt-get install -y unzip fuse
+  ```
+
   * Download last version:
   ```
   $ cd ~
